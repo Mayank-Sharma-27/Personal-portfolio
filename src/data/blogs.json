@@ -1,0 +1,57 @@
+[
+    {
+      "title": "SOLID principles in CRICKET TERMS",
+      "imageSrc": "blogs/solid.png",
+      "description": "This blog explains SOLID priciples in cricket terms",
+      "source": "https://medium.com/@mayank.sharma2796/solid-principles-in-cricket-terms-f62a9405e21e"
+    },
+    {
+      "title": "Leases and Fencing",
+      "imageSrc": "blogs/leases.png",
+      "description": "Achieving Data Consistency in Distributed Systems: Leases and Fencing.",
+      "source": "https://medium.com/@mayank.sharma2796/achieving-data-consistency-in-distributed-systems-leases-and-fencing-a6ca319a0e99"
+    },
+    {
+      "title": "What is Twitter’s Tweet Recommendation Algorithm?",
+      "imageSrc": "blogs/twitter.png",
+      "description": "Dive deep on how twitter prepares the timeline",
+      "source": "https://medium.com/@mayank.sharma2796/what-is-twitters-tweet-recommendation-algorithm-ec0827690fa1"
+    },
+    {
+        "title": "Mastering Backend Caching Strategies",
+        "imageSrc": "blogs/cache.png",
+        "description": "Dive deep on how twitter prepares the timeline",
+        "source": "https://medium.com/@mayank.sharma2796/mastering-backend-caching-strategies-51e87130ba34"
+    },
+    {
+      "title": "Master-Replica Architecture",
+      "imageSrc": "blogs/master-replica.png",
+      "description": "Dive deep on how twitter prepares the timeline",
+      "source": "https://medium.com/@mayank.sharma2796/mastering-backend-caching-strategies-51e87130ba34"
+    },
+    {
+        "title": "Exploring Database Durability: The “D” in ACID",
+        "imageSrc": "blogs/durability.png",
+        "description": "How durability is achieved in the midst of bustling transactions, and its role in distributed settings",
+        "source": "https://medium.com/@mayank.sharma2796/exploring-database-durability-the-d-in-acid-f2d8c13744e9"
+    },
+    {
+        "title": "Exploring Database Isolation: The “I” in ACID",
+        "imageSrc": "blogs/isolation.png",
+        "description": "Diving deep into isolation",
+        "source": "https://medium.com/@mayank.sharma2796/exploring-database-isolation-the-i-in-acid-97ba1a82714e"
+    },
+    {
+        "title": "Exploring Consistency in ACID",
+        "imageSrc": "blogs/consistency.png",
+        "description": "Implementation of Consistency, the “C” in ACID",
+        "source": "https://medium.com/@mayank.sharma2796/exploring-database-isolation-the-i-in-acid-97ba1a82714e"
+    },
+    {
+        "title": "Understanding Atomicity in ACID",
+        "imageSrc": "blogs/atomicity.png",
+        "description": "Implementation of Atomicity, the “A” in ACID",
+        "source": "https://medium.com/@mayank.sharma2796/understanding-atomicity-in-acid-dd96ebd7d6f9"
+    }
+
+  ]

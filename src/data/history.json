@@ -1,0 +1,35 @@
+[
+    {
+        "role": "Software Development Engineer 2",
+        "organisation": "Aamazon",
+        "startDate": "Aug, 2022",
+        "endDate": "present",
+        "experiences": ["Migrating 15-year-old framework with 8000 Perl lines, impacting Amazon Retail checkout, fostering team collaboration.",
+      "Enhanced data pipeline for a tier1 service.",
+  "Spearheaded Prime Day 2023 planning.",
+  "Slashed service deployment time by 25%."],
+        "imageSrc": "history/amazon.png"
+      },
+    {
+      "role": "Software Engineer",
+      "organisation": "Part Avatar",
+      "startDate": "July, 2018",
+      "endDate": "July, 2022",
+      "experiences": ["Integrated payment methods (Gpay, Apple Pay, Sezzle, Flexity) in checkout.",
+       "Developed RESTful APIs, database interactions for frontend features.",
+        "Boosted productivity through automated testing processes."],
+      "imageSrc": "history/partsavatar.png"
+    },
+    
+    {
+      "role": "SWE Intern",
+      "organisation": "Wipro",
+      "startDate": "Jan, 2018",
+      "endDate": "Jun, 2018",
+      "experiences": [
+        "Automated CSV file comparisons using Python scripts.",
+        "Developed a financial report comparison desktop application for a client."
+      ],
+      "imageSrc": "history/wipro.png"
+    }
+  ]

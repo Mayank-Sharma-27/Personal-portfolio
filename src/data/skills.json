@@ -1,0 +1,50 @@
+[
+    {
+      "title": "Java",
+      "imageSrc": "skills/java.png"
+    },
+    {
+      "title": "Python",
+      "imageSrc": "skills/python.png"
+    },
+    {
+      "title": "C++",
+      "imageSrc": "skills/cpp.png"
+    },
+    {
+      "title": "React",
+      "imageSrc": "skills/react.png"
+    },
+    {
+      "title": "HTML",
+      "imageSrc": "skills/html.png"
+    },
+    {
+        "title": "Css",
+        "imageSrc": "skills/css.png"
+    },
+    {
+      "title": "DynamoDB",
+      "imageSrc": "skills/dynamoDb.png"
+    },
+    {
+        "title": "PostgresSql",
+        "imageSrc": "skills/postgresql.png"
+    },
+    {
+      "title": "ElasticSearch",
+      "imageSrc": "skills/elasticsearch.png"
+    },
+    {
+        "title": "AWS",
+        "imageSrc": "skills/aws.png"
+    },
+    {
+        "title": "Maven",
+        "imageSrc": "skills/maven.png"
+    },
+    {
+      "title": "Docker",
+      "imageSrc": "skills/docker.png"
+  }
+  ]
