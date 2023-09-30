@@ -31,6 +31,7 @@
     font-size: 25px;
     color: var(--color-text);
     text-decoration: none;
+    cursor: pointer;
   }
 
   .menuBtn {

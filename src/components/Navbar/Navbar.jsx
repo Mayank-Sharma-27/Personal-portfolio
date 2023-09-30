@@ -4,8 +4,19 @@ import styles from "./Navbar.module.css";
 
 import { getImageUrl } from '../../utils';
 
+import { Modal } from '../Modal/Modal.jsx';
+
 export const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleOpenModal = () => {
+    setIsOpen(true);
+};
+
+const handleCloseModal = () => {
+  setIsOpen(false);
+};
 
   return (
   <nav className={styles.navbar}>
@@ -36,6 +47,10 @@ export const Navbar = () => {
             </li>
             <li>
                 <a href='#about'>Contact</a>
+            </li>
+            <li>
+                <a onClick={handleOpenModal}>Resume</a>
+                <Modal isOpen={isOpen} onClose={handleCloseModal} />
             </li>
 
         </ul>
