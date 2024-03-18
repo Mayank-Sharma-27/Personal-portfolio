@@ -8,7 +8,7 @@ import { Experience } from "./components/Experience/Experience";
 
 import { Blogs } from "./components/Blogs/Blogs";
 import { Contact } from "./components/Contact/Contact";
-
+import { MediumArticles } from "./components/MediumArticles/MediumArticles";
 
 function App() {
   return (

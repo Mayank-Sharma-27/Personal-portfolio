@@ -1,8 +1,20 @@
 [
     {
+      "title": "How meta improved their cache consistency to 99.99999999",
+      "imageSrc": "blogs/meta_cache.jpg",
+      "description": "This blog explains how meta improved their cache consistency to 99.99999999",
+      "source": "https://medium.com/@mayank.sharma2796/how-meta-improved-their-cache-consistency-to-99-99999999-58d79674a806"
+    },
+    {
+      "title": "Meta Presence Platform | Overview",
+      "imageSrc": "blogs/presence_platform.jpg",
+      "description": "Basic Building block of meta mixed reality development",
+      "source": "https://medium.com/@mayank.sharma2796/meta-presence-platform-overview-46e08007110d"
+    },    
+    {
       "title": "SOLID principles in CRICKET TERMS",
       "imageSrc": "blogs/solid.png",
-      "description": "This blog explains SOLID priciples in cricket terms",
+      "description": "This blog explains SOLID priciples in cricket terms.",
       "source": "https://medium.com/@mayank.sharma2796/solid-principles-in-cricket-terms-f62a9405e21e"
     },
     {
@@ -14,13 +26,13 @@
     {
       "title": "What is Twitter’s Tweet Recommendation Algorithm?",
       "imageSrc": "blogs/twitter.png",
-      "description": "Dive deep on how twitter prepares the timeline",
+      "description": "Dive deep on how twitter prepares the timeline.",
       "source": "https://medium.com/@mayank.sharma2796/what-is-twitters-tweet-recommendation-algorithm-ec0827690fa1"
     },
     {
         "title": "Mastering Backend Caching Strategies",
         "imageSrc": "blogs/cache.png",
-        "description": "Dive deep on how twitter prepares the timeline",
+        "description": "Dive deep on how twitter prepares the timeline.",
         "source": "https://medium.com/@mayank.sharma2796/mastering-backend-caching-strategies-51e87130ba34"
     },
     {
@@ -32,13 +44,13 @@
     {
         "title": "Exploring Database Durability: The “D” in ACID",
         "imageSrc": "blogs/durability.png",
-        "description": "How durability is achieved in the midst of bustling transactions, and its role in distributed settings",
+        "description": "How durability is achieved in the midst of bustling transactions, and its role in distributed settings.",
         "source": "https://medium.com/@mayank.sharma2796/exploring-database-durability-the-d-in-acid-f2d8c13744e9"
     },
     {
         "title": "Exploring Database Isolation: The “I” in ACID",
         "imageSrc": "blogs/isolation.png",
-        "description": "Diving deep into isolation",
+        "description": "Diving deep into isolation.",
         "source": "https://medium.com/@mayank.sharma2796/exploring-database-isolation-the-i-in-acid-97ba1a82714e"
     },
     {
