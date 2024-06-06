@@ -1,1024 +1,696 @@
-<html>
-
-<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<title>How meta improved their cache consistency to 99.99999999</title>
-	<style>
-		/* cspell:disable-file */
-		/* webkit printing magic: print all background colors */
-		html {
-			-webkit-print-color-adjust: exact;
-		}
-
-		* {
-			box-sizing: border-box;
-			-webkit-print-color-adjust: exact;
-		}
-
-		html,
-		body {
-			margin: 0;
-			padding: 0;
-		}
-
-		@media only screen {
-			body {
-				margin: 2em auto;
-				max-width: 900px;
-				color: rgb(55, 53, 47);
-			}
-		}
-
-		body {
-			line-height: 1.5;
-			white-space: pre-wrap;
-		}
-
-		a,
-		a.visited {
-			color: inherit;
-			text-decoration: underline;
-		}
-
-		.pdf-relative-link-path {
-			font-size: 80%;
-			color: #444;
-		}
-
-		h1,
-		h2,
-		h3 {
-			letter-spacing: -0.01em;
-			line-height: 1.2;
-			font-weight: 600;
-			margin-bottom: 0;
-		}
-
-		.page-title {
-			font-size: 2.5rem;
-			font-weight: 700;
-			margin-top: 0;
-			margin-bottom: 0.75em;
-		}
-
-		h1 {
-			font-size: 1.875rem;
-			margin-top: 1.875rem;
-		}
-
-		h2 {
-			font-size: 1.5rem;
-			margin-top: 1.5rem;
-		}
-
-		h3 {
-			font-size: 1.25rem;
-			margin-top: 1.25rem;
-		}
-
-		.source {
-			border: 1px solid #ddd;
-			border-radius: 3px;
-			padding: 1.5em;
-			word-break: break-all;
-		}
-
-		.callout {
-			border-radius: 3px;
-			padding: 1rem;
-		}
-
-		figure {
-			margin: 1.25em 0;
-			page-break-inside: avoid;
-		}
-
-		figcaption {
-			opacity: 0.5;
-			font-size: 85%;
-			margin-top: 0.5em;
-		}
-
-		mark {
-			background-color: transparent;
-		}
-
-		.indented {
-			padding-left: 1.5em;
-		}
-
-		hr {
-			background: transparent;
-			display: block;
-			width: 100%;
-			height: 1px;
-			visibility: visible;
-			border: none;
-			border-bottom: 1px solid rgba(55, 53, 47, 0.09);
-		}
-
-		img {
-			max-width: 100%;
-		}
-
-		@media only print {
-			img {
-				max-height: 100vh;
-				object-fit: contain;
-			}
-		}
-
-		@page {
-			margin: 1in;
-		}
-
-		.collection-content {
-			font-size: 0.875rem;
-		}
-
-		.column-list {
-			display: flex;
-			justify-content: space-between;
-		}
-
-		.column {
-			padding: 0 1em;
-		}
-
-		.column:first-child {
-			padding-left: 0;
-		}
-
-		.column:last-child {
-			padding-right: 0;
-		}
-
-		.table_of_contents-item {
-			display: block;
-			font-size: 0.875rem;
-			line-height: 1.3;
-			padding: 0.125rem;
-		}
-
-		.table_of_contents-indent-1 {
-			margin-left: 1.5rem;
-		}
-
-		.table_of_contents-indent-2 {
-			margin-left: 3rem;
-		}
-
-		.table_of_contents-indent-3 {
-			margin-left: 4.5rem;
-		}
-
-		.table_of_contents-link {
-			text-decoration: none;
-			opacity: 0.7;
-			border-bottom: 1px solid rgba(55, 53, 47, 0.18);
-		}
-
-		table,
-		th,
-		td {
-			border: 1px solid rgba(55, 53, 47, 0.09);
-			border-collapse: collapse;
-		}
-
-		table {
-			border-left: none;
-			border-right: none;
-		}
-
-		th,
-		td {
-			font-weight: normal;
-			padding: 0.25em 0.5em;
-			line-height: 1.5;
-			min-height: 1.5em;
-			text-align: left;
-		}
-
-		th {
-			color: rgba(55, 53, 47, 0.6);
-		}
-
-		ol,
-		ul {
-			margin: 0;
-			margin-block-start: 0.6em;
-			margin-block-end: 0.6em;
-		}
-
-		li>ol:first-child,
-		li>ul:first-child {
-			margin-block-start: 0.6em;
-		}
-
-		ul>li {
-			list-style: disc;
-		}
-
-		ul.to-do-list {
-			padding-inline-start: 0;
-		}
-
-		ul.to-do-list>li {
-			list-style: none;
-		}
-
-		.to-do-children-checked {
-			text-decoration: line-through;
-			opacity: 0.375;
-		}
-
-		ul.toggle>li {
-			list-style: none;
-		}
-
-		ul {
-			padding-inline-start: 1.7em;
-		}
-
-		ul>li {
-			padding-left: 0.1em;
-		}
-
-		ol {
-			padding-inline-start: 1.6em;
-		}
-
-		ol>li {
-			padding-left: 0.2em;
-		}
-
-		.mono ol {
-			padding-inline-start: 2em;
-		}
-
-		.mono ol>li {
-			text-indent: -0.4em;
-		}
-
-		.toggle {
-			padding-inline-start: 0em;
-			list-style-type: none;
-		}
-
-		/* Indent toggle children */
-		.toggle>li>details {
-			padding-left: 1.7em;
-		}
-
-		.toggle>li>details>summary {
-			margin-left: -1.1em;
-		}
-
-		.selected-value {
-			display: inline-block;
-			padding: 0 0.5em;
-			background: rgba(206, 205, 202, 0.5);
-			border-radius: 3px;
-			margin-right: 0.5em;
-			margin-top: 0.3em;
-			margin-bottom: 0.3em;
-			white-space: nowrap;
-		}
-
-		.collection-title {
-			display: inline-block;
-			margin-right: 1em;
-		}
-
-		.page-description {
-			margin-bottom: 2em;
-		}
-
-		.simple-table {
-			margin-top: 1em;
-			font-size: 0.875rem;
-			empty-cells: show;
-		}
-
-		.simple-table td {
-			height: 29px;
-			min-width: 120px;
-		}
-
-		.simple-table th {
-			height: 29px;
-			min-width: 120px;
-		}
-
-		.simple-table-header-color {
-			background: rgb(247, 246, 243);
-			color: black;
-		}
-
-		.simple-table-header {
-			font-weight: 500;
-		}
-
-		time {
-			opacity: 0.5;
-		}
-
-		.icon {
-			display: inline-block;
-			max-width: 1.2em;
-			max-height: 1.2em;
-			text-decoration: none;
-			vertical-align: text-bottom;
-			margin-right: 0.5em;
-		}
-
-		img.icon {
-			border-radius: 3px;
-		}
-
-		.user-icon {
-			width: 1.5em;
-			height: 1.5em;
-			border-radius: 100%;
-			margin-right: 0.5rem;
-		}
-
-		.user-icon-inner {
-			font-size: 0.8em;
-		}
-
-		.text-icon {
-			border: 1px solid #000;
-			text-align: center;
-		}
-
-		.page-cover-image {
-			display: block;
-			object-fit: cover;
-			width: 100%;
-			max-height: 30vh;
-		}
-
-		.page-header-icon {
-			font-size: 3rem;
-			margin-bottom: 1rem;
-		}
-
-		.page-header-icon-with-cover {
-			margin-top: -0.72em;
-			margin-left: 0.07em;
-		}
-
-		.page-header-icon img {
-			border-radius: 3px;
-		}
-
-		.link-to-page {
-			margin: 1em 0;
-			padding: 0;
-			border: none;
-			font-weight: 500;
-		}
-
-		p>.user {
-			opacity: 0.5;
-		}
-
-		td>.user,
-		td>time {
-			white-space: nowrap;
-		}
-
-		input[type="checkbox"] {
-			transform: scale(1.5);
-			margin-right: 0.6em;
-			vertical-align: middle;
-		}
-
-		p {
-			margin-top: 0.5em;
-			margin-bottom: 0.5em;
-		}
-
-		.image {
-			border: none;
-			margin: 1.5em 0;
-			padding: 0;
-			border-radius: 0;
-			text-align: center;
-		}
-
-		.code,
-		code {
-			background: rgba(135, 131, 120, 0.15);
-			border-radius: 3px;
-			padding: 0.2em 0.4em;
-			border-radius: 3px;
-			font-size: 85%;
-			tab-size: 2;
-		}
-
-		code {
-			color: #eb5757;
-		}
-
-		.code {
-			padding: 1.5em 1em;
-		}
-
-		.code-wrap {
-			white-space: pre-wrap;
-			word-break: break-all;
-		}
-
-		.code>code {
-			background: none;
-			padding: 0;
-			font-size: 100%;
-			color: inherit;
-		}
-
-		blockquote {
-			font-size: 1.25em;
-			margin: 1em 0;
-			padding-left: 1em;
-			border-left: 3px solid rgb(55, 53, 47);
-		}
-
-		.bookmark {
-			text-decoration: none;
-			max-height: 8em;
-			padding: 0;
-			display: flex;
-			width: 100%;
-			align-items: stretch;
-		}
-
-		.bookmark-title {
-			font-size: 0.85em;
-			overflow: hidden;
-			text-overflow: ellipsis;
-			height: 1.75em;
-			white-space: nowrap;
-		}
-
-		.bookmark-text {
-			display: flex;
-			flex-direction: column;
-		}
-
-		.bookmark-info {
-			flex: 4 1 180px;
-			padding: 12px 14px 14px;
-			display: flex;
-			flex-direction: column;
-			justify-content: space-between;
-		}
-
-		.bookmark-image {
-			width: 33%;
-			flex: 1 1 180px;
-			display: block;
-			position: relative;
-			object-fit: cover;
-			border-radius: 1px;
-		}
-
-		.bookmark-description {
-			color: rgba(55, 53, 47, 0.6);
-			font-size: 0.75em;
-			overflow: hidden;
-			max-height: 4.5em;
-			word-break: break-word;
-		}
-
-		.bookmark-href {
-			font-size: 0.75em;
-			margin-top: 0.25em;
-		}
-
-		.sans {
-			font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
-		}
-
-		.code {
-			font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace;
-		}
-
-		.serif {
-			font-family: Lyon-Text, Georgia, ui-serif, serif;
-		}
-
-		.mono {
-			font-family: iawriter-mono, Nitti, Menlo, Courier, monospace;
-		}
-
-		.pdf .sans {
-			font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP';
-		}
-
-		.pdf:lang(zh-CN) .sans {
-			font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC';
-		}
-
-		.pdf:lang(zh-TW) .sans {
-			font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC';
-		}
-
-		.pdf:lang(ko-KR) .sans {
-			font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR';
-		}
-
-		.pdf .code {
-			font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP';
-		}
-
-		.pdf:lang(zh-CN) .code {
-			font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC';
-		}
-
-		.pdf:lang(zh-TW) .code {
-			font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC';
-		}
-
-		.pdf:lang(ko-KR) .code {
-			font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR';
-		}
-
-		.pdf .serif {
-			font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP';
-		}
-
-		.pdf:lang(zh-CN) .serif {
-			font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC';
-		}
-
-		.pdf:lang(zh-TW) .serif {
-			font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC';
-		}
-
-		.pdf:lang(ko-KR) .serif {
-			font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR';
-		}
-
-		.pdf .mono {
-			font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP';
-		}
-
-		.pdf:lang(zh-CN) .mono {
-			font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC';
-		}
-
-		.pdf:lang(zh-TW) .mono {
-			font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC';
-		}
-
-		.pdf:lang(ko-KR) .mono {
-			font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR';
-		}
-
-		.highlight-default {
-			color: rgba(55, 53, 47, 1);
-		}
-
-		.highlight-gray {
-			color: rgba(120, 119, 116, 1);
-			fill: rgba(120, 119, 116, 1);
-		}
-
-		.highlight-brown {
-			color: rgba(159, 107, 83, 1);
-			fill: rgba(159, 107, 83, 1);
-		}
-
-		.highlight-orange {
-			color: rgba(217, 115, 13, 1);
-			fill: rgba(217, 115, 13, 1);
-		}
-
-		.highlight-yellow {
-			color: rgba(203, 145, 47, 1);
-			fill: rgba(203, 145, 47, 1);
-		}
-
-		.highlight-teal {
-			color: rgba(68, 131, 97, 1);
-			fill: rgba(68, 131, 97, 1);
-		}
-
-		.highlight-blue {
-			color: rgba(51, 126, 169, 1);
-			fill: rgba(51, 126, 169, 1);
-		}
-
-		.highlight-purple {
-			color: rgba(144, 101, 176, 1);
-			fill: rgba(144, 101, 176, 1);
-		}
-
-		.highlight-pink {
-			color: rgba(193, 76, 138, 1);
-			fill: rgba(193, 76, 138, 1);
-		}
-
-		.highlight-red {
-			color: rgba(212, 76, 71, 1);
-			fill: rgba(212, 76, 71, 1);
-		}
-
-		.highlight-gray_background {
-			background: rgba(241, 241, 239, 1);
-		}
-
-		.highlight-brown_background {
-			background: rgba(244, 238, 238, 1);
-		}
-
-		.highlight-orange_background {
-			background: rgba(251, 236, 221, 1);
-		}
-
-		.highlight-yellow_background {
-			background: rgba(251, 243, 219, 1);
-		}
-
-		.highlight-teal_background {
-			background: rgba(237, 243, 236, 1);
-		}
-
-		.highlight-blue_background {
-			background: rgba(231, 243, 248, 1);
-		}
-
-		.highlight-purple_background {
-			background: rgba(244, 240, 247, 0.8);
-		}
-
-		.highlight-pink_background {
-			background: rgba(249, 238, 243, 0.8);
-		}
-
-		.highlight-red_background {
-			background: rgba(253, 235, 236, 1);
-		}
-
-		.block-color-default {
-			color: inherit;
-			fill: inherit;
-		}
-
-		.block-color-gray {
-			color: rgba(120, 119, 116, 1);
-			fill: rgba(120, 119, 116, 1);
-		}
-
-		.block-color-brown {
-			color: rgba(159, 107, 83, 1);
-			fill: rgba(159, 107, 83, 1);
-		}
-
-		.block-color-orange {
-			color: rgba(217, 115, 13, 1);
-			fill: rgba(217, 115, 13, 1);
-		}
-
-		.block-color-yellow {
-			color: rgba(203, 145, 47, 1);
-			fill: rgba(203, 145, 47, 1);
-		}
-
-		.block-color-teal {
-			color: rgba(68, 131, 97, 1);
-			fill: rgba(68, 131, 97, 1);
-		}
-
-		.block-color-blue {
-			color: rgba(51, 126, 169, 1);
-			fill: rgba(51, 126, 169, 1);
-		}
-
-		.block-color-purple {
-			color: rgba(144, 101, 176, 1);
-			fill: rgba(144, 101, 176, 1);
-		}
-
-		.block-color-pink {
-			color: rgba(193, 76, 138, 1);
-			fill: rgba(193, 76, 138, 1);
-		}
-
-		.block-color-red {
-			color: rgba(212, 76, 71, 1);
-			fill: rgba(212, 76, 71, 1);
-		}
-
-		.block-color-gray_background {
-			background: rgba(241, 241, 239, 1);
-		}
-
-		.block-color-brown_background {
-			background: rgba(244, 238, 238, 1);
-		}
-
-		.block-color-orange_background {
-			background: rgba(251, 236, 221, 1);
-		}
-
-		.block-color-yellow_background {
-			background: rgba(251, 243, 219, 1);
-		}
-
-		.block-color-teal_background {
-			background: rgba(237, 243, 236, 1);
-		}
-
-		.block-color-blue_background {
-			background: rgba(231, 243, 248, 1);
-		}
-
-		.block-color-purple_background {
-			background: rgba(244, 240, 247, 0.8);
-		}
-
-		.block-color-pink_background {
-			background: rgba(249, 238, 243, 0.8);
-		}
-
-		.block-color-red_background {
-			background: rgba(253, 235, 236, 1);
-		}
-
-		.select-value-color-uiBlue {
-			background-color: rgba(35, 131, 226, .07);
-		}
-
-		.select-value-color-pink {
-			background-color: rgba(245, 224, 233, 1);
-		}
-
-		.select-value-color-purple {
-			background-color: rgba(232, 222, 238, 1);
-		}
-
-		.select-value-color-green {
-			background-color: rgba(219, 237, 219, 1);
-		}
-
-		.select-value-color-gray {
-			background-color: rgba(227, 226, 224, 1);
-		}
-
-		.select-value-color-transparentGray {
-			background-color: rgba(227, 226, 224, 0);
-		}
-
-		.select-value-color-translucentGray {
-			background-color: rgba(255, 255, 255, 0.0375);
-		}
-
-		.select-value-color-orange {
-			background-color: rgba(250, 222, 201, 1);
-		}
-
-		.select-value-color-brown {
-			background-color: rgba(238, 224, 218, 1);
-		}
-
-		.select-value-color-red {
-			background-color: rgba(255, 226, 221, 1);
-		}
-
-		.select-value-color-yellow {
-			background-color: rgba(253, 236, 200, 1);
-		}
-
-		.select-value-color-blue {
-			background-color: rgba(211, 229, 239, 1);
-		}
-
-		.select-value-color-pageGlass {
-			background-color: undefined;
-		}
-
-		.select-value-color-washGlass {
-			background-color: undefined;
-		}
-
-		.checkbox {
-			display: inline-flex;
-			vertical-align: text-bottom;
-			width: 16;
-			height: 16;
-			background-size: 16px;
-			margin-left: 2px;
-			margin-right: 5px;
-		}
-
-		.checkbox-on {
-			background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
-		}
-
-		.checkbox-off {
-			background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
-		}
-	</style>
-</head>
-
-<body>
-	<article id="5e8c2571-0259-41f3-a7c5-32009a634049" class="page sans">
-		<header>
-			<h1 class="page-title"><strong><strong>How meta improved their cache consistency to
-						99.99999999</strong></strong></h1>
-			<p class="page-description"></p>
-		</header>
-		<div class="page-body">
-			<h3 id="e6d405be-78d4-4494-aa6f-8f6d245ccb68" class="">Introduction</h3>
-			<p id="a92d1806-ca35-4949-98a2-bc9c8562f57d" class="">Caching is a powerful technique used across various
-				aspects of computer systems, from hardware like caches to operating systems, web browsers, and
-				especially backend development. For a company like Meta, caching is super important as it helps them
-				reduce latency, scale heavy workloads, and save money. As their use cases are so cache heavy, it
-				introduces another set of problems for them, which is cache invalidations.</p>
-			<p id="bdf4ec41-b937-4d28-9b0d-4481f5564b9d" class="">Over the years, Meta has improved their cache
-				consistency measure from 99.9999 (six nines) to 99.99999999 (10 nines), which means less than 1 out of
-				10 billion cache writes would be inconsistent in their cache clusters.</p>
-			<p id="52062d3a-27cc-4859-9122-3e55b1a23424" class="">In this blog, we will focus on four main parts:</p>
-			<ol type="1" id="791c5906-29b2-420e-b918-f6d263fbdb49" class="numbered-list" start="1">
-				<li>What are cache invalidation and cache consistency?</li>
-			</ol>
-			<ol type="1" id="75280d70-24df-4007-8a3a-26d2eec66e67" class="numbered-list" start="2">
-				<li>Why does Meta care about cache consistency so deeply that even six nines are not enough?</li>
-			</ol>
-			<ol type="1" id="908e5f36-72cc-452f-be1d-78270d1a7002" class="numbered-list" start="3">
-				<li>How Meta’s monitoring system helped them improved cache invalidation and cache consistency and fix
-					bugs.</li>
-			</ol>
-			<h3 id="79f5756d-0c8e-4b46-8426-8ed8e72a9e47" class="">Cache Invalidation and cache consistency</h3>
-			<p id="9d9a084d-f0d0-4065-9c79-21c7bf9cb1e9" class="">By definition, cache does not hold the source of truth
-				for your data, so there should be a process of actively invalidating the stale cache entries when data
-				in the source of truth changes. If during the process of invalidation, the invalidation gets mishandled,
-				it can indefinitely leave inconsistent values in the cache that are different from what’s in the source
-				of truth.</p>
-			<p id="0f83be56-a079-4b05-b5dc-611e88860bb6" class=""><strong>So how can we invalidate the cache?</strong>
-			</p>
-			<p id="80b40ecd-0422-4071-9f29-999a4dc4b655" class="">We can have something as a TTL to maintain its
-				freshness so that there are no cache invalidations from any other system. But in this blog, where we
-				discuss meta’s cache consistency, we will assume that the invalidation action is being carried out by
-				something other than the cache itself.</p>
-			<p id="033dd5da-732b-4c12-bf4b-68f47c52c60c" class="">First let us look how can cache inconsistency be
-				introduced:</p>
-			<figure id="9443b47c-6f69-4685-9c73-beb2973f3d12" class="image"><a
-					href="How%20meta%20improved%20their%20cache%20consistency%20to%2099%2099%205e8c2571025941f3a7c532009a634049/Cache-made-consisent-image-1_(1).webp"><img
-						style="width:708px"
-						src="How%20meta%20improved%20their%20cache%20consistency%20to%2099%2099%205e8c2571025941f3a7c532009a634049/Cache-made-consisent-image-1_(1).webp" /></a>
-			</figure>
-			<p id="8252af03-0599-4069-93a1-b10873456994" class="">Please assume that 1,2,3,4 are timestamps in
-				increasing sequence</p>
-			<p id="79180c8c-d10c-4fff-abe1-670deb42eee0" class="">1) The cache first tries to fill the value from the DB
-			</p>
-			<p id="690e46ad-1129-4c03-a410-6814805e9376" class="">2) But before the x =42 value reaches the cache some
-				operation updated the db for value x=43</p>
-			<p id="a30bf577-4abc-45c5-9096-1a1b0fba5aca" class="">3) The db sends the cache invalidation event for x=43
-				and it arrives to cache before x=42, and the cache value is set at 43.</p>
-			<p id="117c0e95-c29e-4235-ba40-96d4f20f010e" class="">4) The event x =42 arrives to cache now and the cache
-				is set to 42 and the inconsistency is introduced.</p>
-			<p id="ab262ee9-5156-4ac2-a031-e6e96fd9089b" class="">To solve this problem we can use a version field to
-				perform conflict resolution so that the older version never overrides the older version. This solution
-				would work for almost 99% of the companies which are there on the internet, but the scale on which meta
-				operates even this might not be enough due to the complexity of their systems.</p>
-			<h3 id="8f800f31-324a-403d-96a6-27da1ef2c610" class="">Why do meta care about cache consistency?</h3>
-			<p id="173565fe-4ab3-4960-83ae-4b2b08076cf5" class="">From meta’s perspective, cache inconsistencies are
-				almost as bad as data loss on a database, and from the user&#x27;s perspective, they could lead to a
-				very bad user experience.</p>
-			<p id="73de7628-6c5b-4c05-8651-d7eee472a9fb" class="">When you send a user a DM on Instagram, behind the
-				scenes, there is a mapping for the user to its primary storage, where the messages are stored for the
-				user.</p>
-			<p id="62c3493b-ecf6-4b1b-a885-32a56dd5ce62" class="">Imagine three users here. Bob, Mary, and Alice both
-				send Alice a message. Bob is in the USA Alice is in Europe, and Mary is in Japan. So the system will
-				query in the nearest region close to where the user lives, so send the message to Alex’s data store. In
-				this case, when the TAO replica queried the region where BOB and Mary live, they both had inconsistent
-				data, and it sent the message to the region in which none of it had Alice’s messages.</p>
-			<p id="b7bd29b4-eda6-45b8-85c8-bb7a2ec4d095" class="">
-			</p>
-			<figure id="8978a087-96a8-402d-9100-19f1c75b2efd" class="image"><a
-					href="How%20meta%20improved%20their%20cache%20consistency%20to%2099%2099%205e8c2571025941f3a7c532009a634049/Cache-made-consisent-image-2.webp"><img
-						style="width:708px"
-						src="How%20meta%20improved%20their%20cache%20consistency%20to%2099%2099%205e8c2571025941f3a7c532009a634049/Cache-made-consisent-image-2.webp" /></a>
-			</figure>
-			<p id="17008ecb-f454-4f9c-aa65-4afbe72a7b7e" class="">
-			</p>
-			<p id="760ee76c-92af-4eb2-888f-a1be344940ce" class="">In the above case there would be message loss and bad
-				user experience so it was one of the top problems for meta to solve.</p>
-			<h2 id="7693e770-2c70-40da-8438-f51a415020e5" class="">Monitoring</h2>
-			<p id="378b78d7-6b71-4f40-b328-6b4b21b0fd77" class="">To solve the cache invalidation and cache consistency
-				problem, the first step involves measurement. If we can accurately measure the cache consistency and
-				sound an alarm when there are inconsistent entries in the cache, Meta made sure that their measurement
-				did not contain any false positives, as the on-call engineers would learn to ignore it and the metric
-				would lose trust and become useless.</p>
-			<p id="223392bc-35e2-4ec2-8c8c-09d50aba1e60" class="">Before we dive deep into the actual solution that Meta
-				implemented, the easiest solution would have been to log and trace every cache change in state. This
-				solution would have been feasible in the case of small workloads, but Meta’s system was doing more than
-				10 trillion cache fills a day. Logging and tracing all the cache states would turn a ready-heavy cache
-				workload into an extremely heavy work load, and let&#x27;s not even think about dubugging this.</p>
-			<h3 id="074465a8-c8f5-43a6-bc4f-fe5c7c19c93f" class="">Polaris</h3>
-			<p id="94c8cf24-8725-40c0-a690-573badb42abd" class="">Polaris at a very high level, interacts with a
-				stateful service as a client and assumes no knowledge of service internals. Polaris works on the
-				principle that “Cache should eventually be consistent with the database.&quot; Polaris receives an
-				invalidation event and queries all the replicas to verify if any other violations occurs. For example:
-				if Polaris receives an invalidation event that says x=4 version 4, it then checks all the cache replicas
-				as a client to verify whether any violations of any invariant occur. If one replica returns x=3 @
-				version 3, Polaris flags it as inconsistent and requests the sample to later check it against the same
-				target cache host. <strong>Polaris reports inconsistencies at certain timescales, e.g., one minute, five
-					minutes, or 10 minutes.</strong></p>
-			<figure id="960482a6-36f3-4585-9ad4-a247b77c0378" class="image"><a
-					href="How%20meta%20improved%20their%20cache%20consistency%20to%2099%2099%205e8c2571025941f3a7c532009a634049/polaris.webp"><img
-						style="width:708px"
-						src="How%20meta%20improved%20their%20cache%20consistency%20to%2099%2099%205e8c2571025941f3a7c532009a634049/polaris.webp" /></a>
-			</figure>
-			<p id="b75d7862-cea8-43f7-bbb5-250c3bdc7d09" class="">This multi-timescale design not only allows Polaris to
-				have multiple queues internally to implement backoff and retries efficiently, but also essential for
-				preventing it from producing false positives.</p>
-			<p id="739f8c5e-2b32-40c5-80dd-d3b7ee215b69" class="">Let us understand this with one more example:</p>
-			<p id="4196d431-11aa-40f1-ad96-5f075cc4882b" class="">Suppose Polaris receives an invalidation with x = 4,
-				version 4. But when the Polaris checks the cache, it cannot find an entry for x, and it should flag this
-				as an inconsistency. In this case, there are two possibilities.</p>
-			<ol type="1" id="8e96c401-bafb-467c-ba36-1682613967d8" class="numbered-list" start="1">
-				<li>x was invisible at version 3, but the version 4 write is the latest write on the key, and it is
-					indeed a cache inconsistency.</li>
-			</ol>
-			<ol type="1" id="0654678d-adf8-4b29-8891-4c1827132da4" class="numbered-list" start="2">
-				<li>It is possible that there’s a version 5 write that deletes the key x, and perhaps Polaris is just
-					seeing a more recent view of the data than what is in the invalidation event.</li>
-			</ol>
-			<p id="8a0f2248-ed62-4b5e-a41d-dfce64b20770" class="">Now, how do we make sure which of the two cases is the
-				correct one?</p>
-			<p id="a89712a8-7d38-4dec-b230-3511e9fbf744" class="">To verify, among the 2 cases, Polaris needs to check
-				by querying the database. The queries that bypass the cache may be compute-intensive and can also expose
-				the database to risks because protecting the database and scaling read heavy workloads are two of the
-				most common use cases for caches. So, we can’t send too many queries to the system.</p>
-			<p id="742a9d9d-91b4-4e51-a000-661ab450e29c" class="">Polaris solves this problem by delaying performing
-				such checks and making the call to the database until the inconsistent sample crosses a set threshold,
-				such as 1 minute or 5 minutes. Polaris products the metric that says “N nines of cahce writes are
-				consistent in M minutes.&quot; So right now, Polaris provides a metric that says 99.99999999 cache is
-				consistent for the five-minute timescale.</p>
-			<p id="6e4befcf-353b-45b8-87ce-ab6900fe92b1" class="">Now let us see how polaris helped meta solved a bug
-				using a coding example on how cache inconsistencies can be produced.</p>
-			<p id="193649f5-22fc-458e-9281-7e591990deeb" class="">Let us understand the flow with a coding example:</p>
-			<p id="0125211d-bbbc-457f-bd5f-b8ad5238f3de" class="">Let us suppose a cache which maintains a key to meta
-				data mapping and key to version mapping. </p>
-			<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"
-				integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg=="
-				crossorigin="anonymous" referrerPolicy="no-referrer"></script>
-			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css"
-				integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ=="
-				crossorigin="anonymous" referrerPolicy="no-referrer" />
-			<pre id="c2d3d788-8fe7-44d3-93f7-a83ba3acf5f1" class="code"><code class="language-Python">cache_data = {}
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>How meta improved their cache consistency to 99.99999999</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+    margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.highlight-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.block-color-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-uiBlue { background-color: rgba(35, 131, 226, .07); }
+.select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+.select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+.select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+.select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+.select-value-color-transparentGray { background-color: rgba(227, 226, 224, 0); }
+.select-value-color-translucentGray { background-color: rgba(255, 255, 255, 0.0375); }
+.select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+.select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+.select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+.select-value-color-yellow { background-color: rgba(253, 236, 200, 1); }
+.select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+.select-value-color-pageGlass { background-color: undefined; }
+.select-value-color-washGlass { background-color: undefined; }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="5e8c2571-0259-41f3-a7c5-32009a634049" class="page sans"><header><h1 class="page-title"><strong><strong>How meta improved their cache consistency to 99.99999999</strong></strong></h1><p class="page-description"></p></header><div class="page-body"><h3 id="e6d405be-78d4-4494-aa6f-8f6d245ccb68" class="">Introduction</h3><p id="a92d1806-ca35-4949-98a2-bc9c8562f57d" class="">Caching is a powerful technique used across various aspects of computer systems, from hardware like caches to operating systems, web browsers, and especially backend development. For a company like Meta, caching is super important as it helps them reduce latency, scale heavy workloads, and save money. As their use cases are so cache heavy, it introduces another set of problems for them, which is cache invalidations.</p><p id="e1a95446-f6f4-4940-b72b-7999c11cbb4e" class="">Over the years, Meta has improved their cache consistency measure from 99.9999 (six nines) to 99.99999999 (10 nines), which means less than 1 out of 10 billion cache writes would be inconsistent in their cache clusters.</p><p id="248ca5d1-cd6c-4167-9caa-84a0a78a667a" class="">In this blog, we will focus on four main parts:</p><ol type="1" id="e2e68c75-6f81-4db3-9bfa-cde5bc45617d" class="numbered-list" start="1"><li>What are cache invalidation cache consistency?<p id="ca2d732c-2b68-4929-831c-6c87a3a2b14a" class="">and</p></li></ol><ol type="1" id="ebe32e9b-b41c-4bb4-a892-31ffb9b18a69" class="numbered-list" start="2"><li>Why does Meta care about cache consistency so deeply that even six nines are not enough?</li></ol><ol type="1" id="2d23e1fe-4ff4-4d1a-8289-d68ddf30b30f" class="numbered-list" start="3"><li>How Meta’s monitoring system helped them improved cache invalidation and cache consistency and fix bugs.</li></ol><h1 id="22018f4b-a361-4d5b-92a5-c8da718fe346" class=""><strong>Cache Invalidation and cache consistency</strong></h1><p id="13cb2fc5-d246-431e-a4f3-13c9b553da29" class="">By definition, cache does not hold the source of truth for your data, so there should be a process of actively invalidating the stale cache entries when data in the source of truth changes. If during the process of invalidation, the invalidation gets mishandled, it can indefinitely leave inconsistent values in the cache that are different from what’s in the source of truth.</p><p id="7180f8c7-b6b7-4a9f-98f0-d5abdac35ca7" class=""><strong>So how can we invalidate the cache?</strong></p><p id="7954ae95-78bc-4143-ba54-f45ff334f79a" class="">We can have something as a TTL to maintain its freshness so that there are no cache invalidations from any other system. But in this blog, where we discuss meta’s cache consistency, we will assume that the invalidation action is being carried out by something other than the cache itself.</p><p id="8fa938dd-bfc2-475f-9b72-6ffc232e617d" class="">First let us look how can cache inconsistency be introduced:</p><figure id="9443b47c-6f69-4685-9c73-beb2973f3d12" class="image"><a href="How%20meta%20improved%20their%20cache%20consistency%20to%2099%2099%205e8c2571025941f3a7c532009a634049/Cache-made-consisent-image-1_(1).webp"><img style="width:708px" src="How%20meta%20improved%20their%20cache%20consistency%20to%2099%2099%205e8c2571025941f3a7c532009a634049/Cache-made-consisent-image-1_(1).webp"/></a></figure><p id="8c842882-6b44-46cf-b193-7046a7249ae4" class="">Please assume that 1,2,3,4 are timestamps in increasing sequence</p><ol type="1" id="48b3361c-17bd-46ed-ae4b-680acd11cf9f" class="numbered-list" start="1"><li>The cache first tries to fill the value from the DB</li></ol><ol type="1" id="e2d6349d-6187-49ea-95fe-f4666adfb65a" class="numbered-list" start="2"><li>But before the x =42 value reaches the cache some operation updated the db for value x=43</li></ol><ol type="1" id="aa8475a5-0783-4c6d-a3a0-167b31e0347b" class="numbered-list" start="3"><li>The db sends the cache invalidation event for x=43 and it arrives to cache before x=42, and the cache value is set at 43.</li></ol><ol type="1" id="bc1aae72-7b2d-443a-8b6a-14d96396505b" class="numbered-list" start="4"><li>The event x =42 arrives to cache now and the cache is set to 42 and the inconsistency is introduced.</li></ol><p id="636dbd4e-8d43-40a6-8631-c052721d49cc" class="">To solve this problem we can use a version field to perform conflict resolution so that the older version never overrides the current version. This solution would work for almost 99% of the companies which are there on the internet, but the scale on which meta operates even this might not be enough due to the complexity of their systems.</p><h1 id="a5004b17-bd0b-4ff9-95fd-4f4c321f1588" class=""><strong>Why do meta care about cache consistency so deeply?</strong></h1><p id="02c2a4bf-9c2c-4065-9643-d8baf6f7309c" class="">From meta’s perspective, cache inconsistencies are almost as bad as data loss on a database, and from the user’s perspective, they could lead to a very bad user experience.</p><p id="2cb0dc13-051e-4442-b275-28eedab6b073" class="">When you send a user a DM on Instagram, behind the scenes, there is a mapping for the user to its primary storage, where the messages are stored for the user.</p><p id="b0c7cf78-f07a-40b0-b70f-3928c078b445" class="">Imagine three users here. Bob, Mary, and Alice. Both the users send Alice a message. Bob is in the USA Alice is in Europe, and Mary is in Japan. So the system will query in the nearest region close to where the user lives, so send the message to Alice data store. In this case, when the TAO replica queried the region where BOB and Mary live, they both had inconsistent data, and it sent the message to the region in which none of it had Alice’s messages.</p><p id="b7bd29b4-eda6-45b8-85c8-bb7a2ec4d095" class="">
+</p><figure id="8978a087-96a8-402d-9100-19f1c75b2efd" class="image"><a href="How%20meta%20improved%20their%20cache%20consistency%20to%2099%2099%205e8c2571025941f3a7c532009a634049/Cache-made-consisent-image-2.webp"><img style="width:708px" src="How%20meta%20improved%20their%20cache%20consistency%20to%2099%2099%205e8c2571025941f3a7c532009a634049/Cache-made-consisent-image-2.webp"/></a></figure><p id="f1bd797e-e580-4b47-ae0f-a1a1b02a1b49" class="">In the above case there would be message loss and bad user experience so it was one of the top problems for meta to solve.</p><h1 id="027aaaad-e316-4e7f-993f-6701c3c0093c" class=""><strong>Monitoring</strong></h1><p id="f48468fa-38a0-496f-87a5-7fd8ed6cf230" class="">To solve the cache invalidation and cache consistency problem, the first step involves measurement. If we can accurately measure the cache consistency and sound an alarm when there are inconsistent entries in the cache, Meta made sure that their measurement did not contain any false positives, as the on-call engineers would learn to ignore it and the metric would lose trust and become useless.</p><p id="d529f9b1-bd5a-44f3-9197-bcad30b5a13a" class="">Before we dive deep into the actual solution that Meta implemented, the easiest solution would have been to log and trace every cache change in state. This solution would have been feasible in the case of small workloads, but Meta’s system was doing more than 10 trillion cache fills a day. Logging and tracing all the cache states would turn a ready-heavy cache workload into an extremely heavy work load, and let’s not even think about dubugging this.</p><h1 id="d779cd71-524e-43a2-b54d-353416fb91e5" class=""><strong>Polaris</strong></h1><p id="d62acfae-541b-406f-ae5f-af2c4d60eb70" class="">Polaris at a very high level, interacts with a stateful service as a client and assumes no knowledge of service internals. Polaris works on the principle that “Cache should eventually be consistent with the database.” Polaris receives an invalidation event and queries all the replicas to verify if any other violations occurs. For example: if Polaris receives an invalidation event that says x=4 version 4, it then checks all the cache replicas as a client to verify whether any violations of any invariant occur. If one replica returns x=3 @ version 3, Polaris flags it as inconsistent and requeues the sample to later check it against the same target cache host. <strong>Polaris reports inconsistencies at certain timescales, e.g., one minute, five minutes, or 10 minutes.</strong></p><figure id="960482a6-36f3-4585-9ad4-a247b77c0378" class="image"><a href="How%20meta%20improved%20their%20cache%20consistency%20to%2099%2099%205e8c2571025941f3a7c532009a634049/polaris.webp"><img style="width:708px" src="How%20meta%20improved%20their%20cache%20consistency%20to%2099%2099%205e8c2571025941f3a7c532009a634049/polaris.webp"/></a></figure><p id="3231f53b-6725-434a-8a00-b09ec3c99da0" class="">This multi-timescale design not only allows Polaris to have multiple queues internally to implement backoff and retries efficiently, but also essential for preventing it from producing false positives.</p><p id="68b291ac-66d4-4ea3-b476-ea1b1046f697" class="">Let us understand this with one more example:</p><p id="5f4da95e-ff07-4f3e-8d2b-8158bb8a7728" class="">Suppose Polaris receives an invalidation with x = 4, version 4. But when the Polaris checks the cache, it cannot find an entry for x, and it should flag this as an inconsistency. In this case, there are two possibilities.</p><ol type="1" id="520907c2-3303-464e-8116-59cf4345648a" class="numbered-list" start="1"><li>x was invisible at version 3, but the version 4 write is the latest write on the key, and it is indeed a cache inconsistency.</li></ol><ol type="1" id="19ef8a4d-b829-4fd3-a9ea-9692e18aa4e7" class="numbered-list" start="2"><li>It is possible that there’s a version 5 write that deletes the key x, and perhaps Polaris is just seeing a more recent view of the data than what is in the invalidation event.</li></ol><p id="71126373-7c0a-4964-adfa-74780f533a34" class="">Now, how do we make sure which of the two cases is the correct one?</p><p id="0a3b3fc2-b8ec-4dc1-a626-83a93b473eb9" class="">To verify, among the 2 cases, Polaris needs to check by querying the database. The queries that bypass the cache may be compute-intensive and can also expose the database to risks because protecting the database and scaling read heavy workloads are two of the most common use cases for caches. So, we can’t send too many queries to the system.</p><p id="6cad0b5d-5a27-4588-916e-daf233afbb73" class="">Polaris solves this problem by delaying performing such checks and making the call to the database until the inconsistent sample crosses a set threshold, such as 1 minute or 5 minutes. Polaris products the metric that says “N nines of cahce writes are consistent in M minutes.” So right now, Polaris provides a metric that says 99.99999999 cache is consistent for the five-minute timescale.</p><p id="a45f3b4f-1914-43b7-98a4-955423dd199d" class="">Now let us see how polaris helped meta solved a bug using a coding example on how cache inconsistencies can be produced.</p><p id="f0b8a34f-969d-4639-b107-40d2e5de7797" class="">Let us understand the flow with a coding example:</p><p id="7eb9b50e-2c12-49db-99ed-202541676d9a" class="">Let us suppose a cache which maintains a key to meta data mapping and key to version mapping.</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="c2d3d788-8fe7-44d3-93f7-a83ba3acf5f1" class="code"><code class="language-Python">cache_data = {}
 cache_version = {}
 
 meta_data_table = {&quot;1&quot;: 42}
-version_table = {&quot;1&quot;: 4}</code></pre>
-			<p id="38871282-aa28-46cd-97e3-dc7c7c13b1b9" class=""><br />1. When the read request comes the value is
-				first checked in the cache, if the value is not present in the cache then the value is returned from the
-				database<br /></p>
-			<figure id="6b372226-9dc3-4fe7-830c-93acc0955b03" class="image"><a
-					href="How%20meta%20improved%20their%20cache%20consistency%20to%2099%2099%205e8c2571025941f3a7c532009a634049/time_graph.webp"><img
-						style="width:708px"
-						src="How%20meta%20improved%20their%20cache%20consistency%20to%2099%2099%205e8c2571025941f3a7c532009a634049/time_graph.webp" /></a>
-			</figure>
-			<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"
-				integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg=="
-				crossorigin="anonymous" referrerPolicy="no-referrer"></script>
-			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css"
-				integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ=="
-				crossorigin="anonymous" referrerPolicy="no-referrer" />
-			<pre id="e6717fd1-0898-4e64-9ae5-95e64e46d11e" class="code"><code class="language-Python">def read_value(key):
+version_table = {&quot;1&quot;: 4}</code></pre><p id="38871282-aa28-46cd-97e3-dc7c7c13b1b9" class=""><br/>1. When the read request comes the value is first checked in the cache, if the value is not present in the cache then the value is returned from the database<br/></p><figure id="6b372226-9dc3-4fe7-830c-93acc0955b03" class="image"><a href="How%20meta%20improved%20their%20cache%20consistency%20to%2099%2099%205e8c2571025941f3a7c532009a634049/time_graph.webp"><img style="width:708px" src="How%20meta%20improved%20their%20cache%20consistency%20to%2099%2099%205e8c2571025941f3a7c532009a634049/time_graph.webp"/></a></figure><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="e6717fd1-0898-4e64-9ae5-95e64e46d11e" class="code"><code class="language-Python">def read_value(key):
     value = read_value_from_cache(key)
     if value is not None:
         return value
     else:
-        return meta_data_table[key]</code></pre>
-			<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"
-				integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg=="
-				crossorigin="anonymous" referrerPolicy="no-referrer"></script>
-			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css"
-				integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ=="
-				crossorigin="anonymous" referrerPolicy="no-referrer" />
-			<pre id="547479f9-6323-4f3e-adc0-d2d95b1787db" class="code"><code class="language-Python">def read_value_from_cache(key):
+        return meta_data_table[key]</code></pre><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="547479f9-6323-4f3e-adc0-d2d95b1787db" class="code"><code class="language-Python">def read_value_from_cache(key):
     if key in cache_data:
         return cache_data[key]
     else:
         fill_cache_thread = threading.Thread(target=fill_cache(key))
         fill_cache_thread.start()
-        return None</code></pre>
-			<p id="1f964fcb-9a7f-402e-bb07-8bcdaab93cdf" class=""><br />2. The cache returns the None result and then
-				starts to fill the cache from the database. I have used threads here to make the process async.<br />
-			</p>
-			<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"
-				integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg=="
-				crossorigin="anonymous" referrerPolicy="no-referrer"></script>
-			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css"
-				integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ=="
-				crossorigin="anonymous" referrerPolicy="no-referrer" />
-			<pre id="631e142e-2fc7-4646-91c7-b1e7d22c05f6" class="code"><code class="language-Python">def fill_cache_metadata(key):
+        return None</code></pre><p id="1f964fcb-9a7f-402e-bb07-8bcdaab93cdf" class=""><br/>2. The cache returns the None result and then starts to fill the cache from the database. I have used threads here to make the process async.<br/></p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="631e142e-2fc7-4646-91c7-b1e7d22c05f6" class="code"><code class="language-Python">def fill_cache_metadata(key):
     meta_data = meta_data_table[key]
     print(&quot;Filling cache meta data for&quot;, meta_data)
     cache_data[key] = meta_data
@@ -1041,19 +713,7 @@ def write_value(key, value):
     
  def write_in_databse_transactionally(key, data, version):
     meta_data_table[key] = data
-    version_table[key] = version   </code></pre>
-			<p id="77ff585e-ecf9-4941-a894-c1117a367312" class="">3) In the meanwhile when the version data is filled
-				into the cache the the database has the new write request updating the meta data value and the version
-				value. At this moment it looks like a bug but it is not as the cache invalidation should bring back the
-				cache to the consistent state with the database.(Note I have added the time.sleep in cache and write in
-				database function to reproduce the issue).</p>
-			<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"
-				integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg=="
-				crossorigin="anonymous" referrerPolicy="no-referrer"></script>
-			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css"
-				integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ=="
-				crossorigin="anonymous" referrerPolicy="no-referrer" />
-			<pre id="696c8317-56b8-4e0e-9b0a-fd5b58172d90" class="code"><code class="language-Python">def invalidate_cache(key, metadata, version):
+    version_table[key] = version   </code></pre><p id="77ff585e-ecf9-4941-a894-c1117a367312" class="">3) In the meanwhile when the version data is filled into the cache the the database has the new write request updating the meta data value and the version value. At this moment it looks like a bug but it is not as the cache invalidation should bring back the cache to the consistent state with the database.(Note I have added the time.sleep in cache and write in database function to reproduce the issue).</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="696c8317-56b8-4e0e-9b0a-fd5b58172d90" class="code"><code class="language-Python">def invalidate_cache(key, metadata, version):
     try:
         cache_data = cache_data[key][value] ## To produce error
     except:
@@ -1064,72 +724,11 @@ def drop_cache(key, version):
     cache_version_value = cache_version[key]
     if version &gt; cache_version_value:
         cache_data.pop(key)
-        cache_version.pop(key)</code></pre>
-			<p id="24560616-0c47-4266-9d37-5aaed09b1c85" class="">4 Later, during the cache invalidation the due to some
-				reason the invalidation failed and the exception handler had the condition to drop the cache in that
-				case. </p>
-			<p id="0d74c5ed-ac63-435b-9a8a-c85098beab01" class="">5) The drop cache function had the logic that of the
-				latest value is greater than the cache_version_value then delete the key, but in our case this is not.
-				So this leads to leaving stale metadata in cache indefinitely</p>
-			<p id="36d2fa76-d5a9-459e-a987-d56b7052935e" class="">Please keep in mind this is the very simplified
-				variation of how the bug may have occurred, The actual bug has even more intricacy, with database
-				replication and cross region communication involved. The bug gets triggered only when all steps above
-				occur and happen specifically in this sequence. The inconsistency gets triggered very rarely. The bug
-				hides in the error handling code behind interleaving operations and transient errors. </p>
-			<h3 id="edb56521-3cc2-4a11-a349-2b4f2611177a" class=""><strong>Consistency tracing</strong></h3>
-			<p id="1925f5ff-1cd5-429f-98c1-dcf89825cea2" class="">Now that you are on call and have been paged for the
-				cache inconsistencies from Polaris, it is most important to check the logs and where the issue could be.
-				As we discussed previously, logging each and every cache data change is almost impossible, but what if
-				we only log the changes that have the potential to cause the change?</p>
-			<figure id="7b824023-d439-4649-b447-93d1eaa572eb" class="image"><a
-					href="How%20meta%20improved%20their%20cache%20consistency%20to%2099%2099%205e8c2571025941f3a7c532009a634049/Meta_bug.webp"><img
-						style="width:708px"
-						src="How%20meta%20improved%20their%20cache%20consistency%20to%2099%2099%205e8c2571025941f3a7c532009a634049/Meta_bug.webp" /></a>
-			</figure>
-			<p id="6a67b41a-666a-42c9-b33c-5b0936002a18" class="">If we see the above code that we implemented the issue
-				can arise in case if the cache did not receive the invalidation event or the invalidation did not work.
-				From the oncall’s perspective we need to check the following:</p>
-			<ul id="1d6cebee-fb95-4f1a-9206-8dabd5659ddc" class="bulleted-list">
-				<li style="list-style-type:disc">Did the cache server receive the invalidate?</li>
-			</ul>
-			<ul id="ecc95a8e-99f1-4008-bfff-46b32c14584e" class="bulleted-list">
-				<li style="list-style-type:disc">Did the server process the invalidate correctly?</li>
-			</ul>
-			<ul id="d8245eb5-1ee5-47d5-b3dd-56b847472cee" class="bulleted-list">
-				<li style="list-style-type:disc">Did the item become inconsistent afterwards?</li>
-			</ul>
-			<p id="6b3a3500-cfbf-4acb-b640-8247a017d10c" class="">Meta has built a stateful tracing library that logs
-				and traces cache mutations in this small purple window, where all the interesting and complicated
-				interactions trigger bugs that lead to cache inconsistencies.</p>
-			<h2 id="807d78c5-3cee-4b53-9ca5-3b80852341ca" class="">Conclusion</h2>
-			<p id="e6152521-0843-4b4b-bd3f-22f2b12eae3b" class="">For any distributed systems solid monitoring and
-				logging systems are essential to make sure we catch the bug and when we catch the bug we are able to
-				find the root cause quickly so that we mitigate the issue. Using meta’s example, Polaris identified the
-				anomaly and fired an alarm immediately. With information from consistency tracing, it took on-call
-				engineers less than 30 minutes to locate the bug.</p>
-			<p id="211cfab6-95a5-405e-8e6e-a19253f7f7ad" class="">
-			</p>
-			<p id="6a682744-6b07-42b4-9c9f-85c12ace298d" class="">References : <a
-					href="https://engineering.fb.com/2022/06/08/core-infra/cache-made-consistent/">https://engineering.fb.com/2022/06/08/core-infra/cache-made-consistent/</a>
-			</p>
-			<p id="14182d58-a951-453b-b259-98fdcbc11fbf" class="">
-			</p>
-			<p id="da8e515b-c5e1-4076-8538-86049b781eac" class="">Schedule a mock System Design Interview with me : <a
-					href="https://www.meetapro.com/provider/listing/160769">https://www.meetapro.com/provider/listing/160769</a>
-			</p>
-			<p id="58b3cb0c-2bad-4490-8cf4-08038479ec47" class="">You can find my implementation of the bug creation
-				here : <a
-					href="https://github.com/Mayank-Sharma-27/meta-cache-made-consistent">https://github.com/Mayank-Sharma-27/meta-cache-made-consistent</a>
-			</p>
-			<p id="1a1b990e-2f6d-4397-8dfe-b65259f6007e" class="">Linkedin: <a
-					href="https://www.linkedin.com/in/mayank-sharma-2002bb10b/">https://www.linkedin.com/in/mayank-sharma-2002bb10b/</a>
-			</p>
-			<blockquote id="b544e157-9ef2-41b8-8c60-d1f2af984aaf" class="">https://www.buymeacoffee.com/imayanks
-			</blockquote>
-			<p id="82cd0441-2987-4f0a-9513-0b7c23e32932" class="">
-			</p>
-		</div>
-	</article><span class="sans" style="font-size:14px;padding-top:2em"></span>
-</body>
-
-</html>
+        cache_version.pop(key)
+        
+read_thread = threading.Thread(target=read_value, args=(&quot;1&quot;))
+write_thread = threading.Thread(target=write_value, args=(&quot;1&quot;,43))
+print_thread = threading.Thread(target=print_values)        </code></pre><p id="24560616-0c47-4266-9d37-5aaed09b1c85" class="">4  Later, during the cache invalidation the due to some reason the invalidation failed and the exception handler had the condition to drop the cache in that case. </p><p id="0d74c5ed-ac63-435b-9a8a-c85098beab01" class="">5) The drop cache function had the logic that of the latest value is greater than the cache_version_value then delete the key, but in our case this is not. So this leads to leaving stale metadata in cache indefinitely</p><p id="36d2fa76-d5a9-459e-a987-d56b7052935e" class="">Please keep in mind this is the very simplified variation of how the bug may have occurred, The actual bug has even more intricacy, with database replication and cross region communication involved. The bug gets triggered only when all steps above occur and happen specifically in this sequence. The inconsistency gets triggered very rarely. The bug hides in the error handling code behind interleaving operations and transient errors. </p><h3 id="edb56521-3cc2-4a11-a349-2b4f2611177a" class=""><strong>Consistency tracing</strong></h3><p id="1925f5ff-1cd5-429f-98c1-dcf89825cea2" class="">Now that you are on call and have been paged for the cache inconsistencies from Polaris, it is most important to check the logs and where the issue could be. As we discussed previously, logging each and every cache data change is almost impossible, but what if we only log the changes that have the potential to cause the change?</p><figure id="7b824023-d439-4649-b447-93d1eaa572eb" class="image"><a href="How%20meta%20improved%20their%20cache%20consistency%20to%2099%2099%205e8c2571025941f3a7c532009a634049/Meta_bug.webp"><img style="width:708px" src="How%20meta%20improved%20their%20cache%20consistency%20to%2099%2099%205e8c2571025941f3a7c532009a634049/Meta_bug.webp"/></a></figure><p id="6a67b41a-666a-42c9-b33c-5b0936002a18" class="">If we see the above code that we implemented the issue can arise in case if the cache did not receive the invalidation event or the invalidation did not work. From the oncall’s perspective we need to check the following:</p><ul id="1d6cebee-fb95-4f1a-9206-8dabd5659ddc" class="bulleted-list"><li style="list-style-type:disc">Did the cache server receive the invalidate?</li></ul><ul id="ecc95a8e-99f1-4008-bfff-46b32c14584e" class="bulleted-list"><li style="list-style-type:disc">Did the server process the invalidate correctly?</li></ul><ul id="d8245eb5-1ee5-47d5-b3dd-56b847472cee" class="bulleted-list"><li style="list-style-type:disc">Did the item become inconsistent afterwards?</li></ul><p id="6b3a3500-cfbf-4acb-b640-8247a017d10c" class="">Meta has built a stateful tracing library that logs and traces cache mutations in this small purple window, where all the interesting and complicated interactions trigger bugs that lead to cache inconsistencies.</p><h2 id="807d78c5-3cee-4b53-9ca5-3b80852341ca" class="">Conclusion</h2><p id="e6152521-0843-4b4b-bd3f-22f2b12eae3b" class="">For any distributed systems solid monitoring and logging systems are essential to make sure we catch the bug and when we catch the bug we are able to find the root cause quickly so that we mitigate the issue. Using meta’s example, Polaris identified the anomaly and fired an alarm immediately. With information from consistency tracing, it took on-call engineers less than 30 minutes to locate the bug.</p><p id="211cfab6-95a5-405e-8e6e-a19253f7f7ad" class="">
+</p><p id="6a682744-6b07-42b4-9c9f-85c12ace298d" class="">References : <a href="https://engineering.fb.com/2022/06/08/core-infra/cache-made-consistent/">https://engineering.fb.com/2022/06/08/core-infra/cache-made-consistent/</a></p><p id="14182d58-a951-453b-b259-98fdcbc11fbf" class="">
+</p><p id="da8e515b-c5e1-4076-8538-86049b781eac" class="">Schedule a mock System Design Interview with me : <a href="https://www.meetapro.com/provider/listing/160769">https://www.meetapro.com/provider/listing/160769</a></p><p id="58b3cb0c-2bad-4490-8cf4-08038479ec47" class="">You can find my implementation of the bug creation here : <a href="https://github.com/Mayank-Sharma-27/meta-cache-made-consistent">https://github.com/Mayank-Sharma-27/meta-cache-made-consistent</a></p><p id="1a1b990e-2f6d-4397-8dfe-b65259f6007e" class="">Linkedin: <a href="https://www.linkedin.com/in/mayank-sharma-2002bb10b/">https://www.linkedin.com/in/mayank-sharma-2002bb10b/</a></p><blockquote id="b544e157-9ef2-41b8-8c60-d1f2af984aaf" class="">https://www.buymeacoffee.com/imayanks</blockquote><p id="82cd0441-2987-4f0a-9513-0b7c23e32932" class="">
+</p></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>
