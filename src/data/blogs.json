@@ -6,6 +6,12 @@
       "source": "blogs/how-meta-improved-cache-consistency.html"
     },
     {
+      "title": "Behind the scenes of github copilot",
+      "imageSrc": "blogs/github_coplilot.png",
+      "description": "This blog explains github copilot works behind the scenes",
+      "source": "blogs/behind-scenes-of-github-copilot.html"
+    },
+    {
       "title": "Meta Presence Platform | Overview",
       "imageSrc": "blogs/presence_platform.jpg",
       "description": "Basic Building block of meta mixed reality development",
