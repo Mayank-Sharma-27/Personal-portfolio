@@ -1,0 +1,687 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>How twitter improved processing of 400 billion events</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+    margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.highlight-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.block-color-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-uiBlue { background-color: rgba(35, 131, 226, .07); }
+.select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+.select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+.select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+.select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+.select-value-color-transparentGray { background-color: rgba(227, 226, 224, 0); }
+.select-value-color-translucentGray { background-color: rgba(255, 255, 255, 0.0375); }
+.select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+.select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+.select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+.select-value-color-yellow { background-color: rgba(253, 236, 200, 1); }
+.select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+.select-value-color-pageGlass { background-color: undefined; }
+.select-value-color-washGlass { background-color: undefined; }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><a href="/" class="home-button">Mayank Sharma</a><article id="3dee1a95-ac83-4eba-bdca-1919cbebb680" class="page sans"><header><h1 class="page-title">How twitter improved processing of 400 billion events</h1><p class="page-description"></p></header><div class="page-body"><p id="5548e136-9e09-47cf-abfd-28961cd1d9b9" class="">Twitter processes approximately 400 billion events in real time and generates a petabyte of data every day. There are various event sources that Twitter consumes data from, such as distributed databases, Kafka, Twitter event buses, etc.</p><figure id="4e52b96e-f231-4d40-8a9a-3773cc6797a7" class="image"><a href="twitter/blog/twitter_event.webp"><img style="width:708px" src="twitter/blog/twitter_event.webp"/></a></figure><p id="a4cb9ec9-73e4-4256-b14d-3173e1f5d4a4" class=""><strong>In this blog we will try to understand:</strong></p><p id="7036a412-c9a3-4171-8919-1d310ea5ba02" class="">1) How twitter used to process events and what were the problems in that approach.</p><p id="52d2d4a4-93f3-491b-af18-e08184b6f4a4" class="">2) What business and customer impacts prompted twitter to migrate to the new architecture</p><p id="243159e3-59ff-4ce3-963c-7534ab3030c8" class="">3) The new architecture.</p><p id="c51a15c1-f1f5-4585-ab74-717b69d8d485" class="">4) The performance comparison for old and new architectures.</p><p id="346c07fb-4740-4cf2-a429-972dc2100f99" class=""><strong>To process  events twitter has its own set of internal tools such as:</strong></p><p id="19eaf9b6-4ae3-4441-b228-778f87659f0f" class="">1) Scalding is a tool that twitter uses for batch processing.</p><p id="6295d5df-9370-4b5e-b050-28400ffc5f30" class="">2) Heron which is twitter’s own streaming engine</p><p id="c8d63a98-e3b5-4132-af1f-f0d879116e19" class="">3) TimeSeriesAggregator (TSAR) for batch and real time processing</p><p id="073f7e80-92ba-440d-aabe-8eb53cd08e69" class="">4) Nighthawk Twitter’s own distributed cache</p><p id="de03d36e-ddd8-4ba4-9156-457fa2382af9" class="">Before we dive deep into how the system of events was evolved lets discuss the 4 internal tool in short detail</p><p id="d7e2b28f-b325-44c6-bdc6-d81e82d72364" class=""><strong>1) Scalding</strong></p><p id="d3feba78-3f2d-483e-a9c1-036edcce6932" class="">Scalding is a Scala library that makes it easy to specify Hadoop MapReduce jobs. Scalding is built on top of <a href="http://www.cascading.org/">Cascading</a>, a Java library that abstracts away low-level Hadoop details. Scalding is comparable to <a href="http://pig.apache.org/">Pig</a>, but offers tight integration with Scala, bringing advantages of Scala to your MapReduce jobs.</p><p id="a339a64f-8b1b-4dd7-87f6-e78f18d0cbcf" class="">2) <strong>Heron</strong></p><p id="48b36d7b-7db8-49d0-8a2d-51a6cf8f1a5f" class="">Apache Heron is twitter’s own stream engine, which was developed due to the need for system to handle petabytes of data, improve developer productivity and simplify debugging.</p><p id="65b0dd92-6dfb-4527-a059-1557f288f115" class="">A streaming application in heron is called topology. A topology is a directed acyclic graph whose nodes represent data-computing elements and whose edges represents the streams of data flowing between the elements.</p><p id="ba3ab3a2-3267-4ef7-8ce1-d7e677522533" class="">There are 2 types of nodes:</p><p id="549a2362-74ac-4471-b837-305b87b0f59c" class="">1) <strong>Spouts</strong>: They connect to a data source and inject the data into a stream</p><p id="92e26511-9bf3-49bf-bcd5-226e56948dfb" class="">2) <strong>Bolts</strong>: They process the incoming data and emit the data</p><p id="1f1d85cd-ec07-49e5-a01d-6cd46ddf2685" class="">
+</p><figure id="0f255195-4bc4-4cde-90ec-d60299b1c578" class="image"><a href="twitter/blog/Topology_Example.webp"><img style="width:708px" src="twitter/blog/Topology_Example.webp"/></a></figure><p id="3202d6e9-d61c-4e7f-81c7-17a6df883538" class="">
+</p><p id="d6b92652-ddc9-4874-92aa-fdea4c94e0f0" class="">To read more about it please refer : <a href="https://blog.x.com/engineering/en_us/a/2015/flying-faster-with-twitter-heron">https://blog.x.com/engineering/en_us/a/2015/flying-faster-with-twitter-heron</a></p><p id="eee0ce2b-1505-4732-88b4-f36ac85cb17a" class="">3) <strong>TimeSeriesAggregator</strong></p><p id="72348996-2d6c-457c-a3f3-2d1eb68fc229" class="">Twitter’s data engineering team faced the challenges of processing billions of events every day in batch and in real time. TSAR a robust, scalable, real-time event time series aggregation framework built primarily for engagement monitoring: aggregating interactions with tweets, segmented along a multitude of dimensions such as device, engagement type etc.</p><figure id="2b523792-f7c9-4f69-a586-831a422231e8" class="image"><a href="twitter/blog/TSAR.png"><img style="width:655px" src="twitter/blog/TSAR.png"/></a></figure><p id="0d408e14-6bd4-4436-bba2-f6a2957d7dd0" class="">For interactions and engagement pipelines twitter captures data from various sources such as real time streams, client and server logs. The data is used to extract tweet and user level interactions, time granularities and other metrics. </p><p id="df9628d1-6f9e-4074-849d-79612a2e0cbc" class=""><strong>Now the question that arises is why? Why do twitter needs these complex tools and why do they make so much effort in extracting user level interactions from various sources?</strong></p><p id="9990191f-e185-46d2-8897-ef1ffe3162c0" class="">The answer lies in the business model of twitter, which mainly makes revenue from ads, data product services etc. This extracted data is the source of truth for twitter’s ads and revenue services which helps them to retrieve information and impression on engagement metrics.</p><figure id="24a1e3f9-7907-4f9b-bdac-6df5c6076efc" class="image"><a href="twitter/blog/Screenshot_2024-03-29_at_8.01.48_AM.png"><img style="width:1636px" src="twitter/blog/Screenshot_2024-03-29_at_8.01.48_AM.png"/></a></figure><p id="a9769c15-4f9f-4fba-bb70-e8075259aae0" class="">Let us check on a very high level how things worked in twitter. All the twitter features are backed up by microservices which includes over 100k instances spread across entire world. They are responsible for generating the events which are send to event aggregation layer which is built from a open source project by meta. This layer is responsible for grouping these events running the aggregation jobs and storing the data in the HDFS. These events are then processed and format conversion, recompressing the data to create well generated datasets.</p><h3 id="b01a286c-10d7-48f9-8a80-ec51b8e31df0" class="">Old Architecture</h3><p id="974c8976-e0e6-445d-a7bd-8a9c7edeb686" class="">
+</p><figure id="f9ecf90f-ed6f-44fc-a09d-8421201c0d0f" class="image"><a href="twitter/blog/figure1_oct19.png.img.fullhd.medium.png"><img style="width:708px" src="twitter/blog/figure1_oct19.png.img.fullhd.medium.png"/></a></figure><p id="8aa2a114-fc41-47e3-aced-f18b4de80869" class="">
+</p><p id="b43b04cb-c444-471f-92cd-8bb8e13f5c1a" class="">Twitter’s old architecture was based on <a href="https://www.notion.so/What-is-Lambda-Architecture-8d7b90d3e91b4666b39d419636475b55?pvs=21">lambda architecture</a> which has batch layer, speed layer and the serving layer. The batch component are the logs generated by the clients stored on Hadoop Distributed File System (HDFS) after doing the event processing. Twitter built several Scalding pipelines to preprocess the raw logs and ingest them into Summingbird Platform as offline sources. The real-time component sources are Kafka topics which forms the part of the speed layer. </p><p id="2137187f-6751-41d6-be61-e58bcfd2572b" class="">Once the data is processed the batch data is stored in Manhattan distributed systems, the real time data was stored in the twitter’s own distributed cache Nighthawk.The TSAR systems such as TSAR query service which queries both the cache and the database forms the part of the serving layer.</p><p id="8855a186-e440-49c4-bcf7-65a062b86ce9" class="">Currently, twitter have real-time pipelines and query services in 3 different data centers. To reduce batch computing cost, twitter run batch pipelines in one data center and replicate the data to the other 2 data centers.</p><p id="8c1244d4-a19f-4583-93af-b7e3479dda56" class="">Can you think why real time data was stored in cache instead of a database?</p><h3 id="6672fca8-0ba7-455a-a211-5d1d616577b2" class="">Challenges in the old architecture</h3><p id="d9db1ab7-62c6-4b3a-8892-e998a624a0bc" class="">Let us try to understand the challenges that this architecture can have in case of real time events</p><figure id="442201e8-9ea5-4055-b047-290e164641cc" class="image"><a href="twitter/blog/Sample_topology.webp"><img style="width:708px" src="twitter/blog/Sample_topology.webp"/></a></figure><p id="7472ba64-c239-4410-95af-64b10d21fa85" class="">Let us understand this with an example:</p><p id="70307e79-02a2-48d3-a543-d6f7d814d988" class="">Suppose there is a big event like FIFA world cup the tweet source will start to send a lot of events to the tweet topology the parse tweet bolts can not process the events in the time and there is a back pressure within the topology. When the system is under back pressure for a long time, the heron bolts can accumulate spout lag which indicates high system latency. The twitter observed that when this case happen it takes very long time for the topology lag to go down.</p><p id="fdfeb12c-a3bd-4e36-b834-7e8cd827cabe" class="">The operational solution that the team used was to restart the Heron containers to restart processing the stream. This can cause loss of events during the operation which could lead to inaccuracy in the aggregated counts in the cache.</p><p id="e28cf18f-10b7-451f-94fe-a098fe641f09" class="">Now let us try to understand the batch events example. Twitter has several heavy computation pipelines processing PB scale of data and running hourly to sync data in the Manhattan database. Now let us imagine a case where the sync job takes more than an hour and the next job is scheduled to start, this could lead to a case where the back pressure on the system could increase and lead to loss of data.</p><p id="84ae0e56-6047-4852-8ace-3083caa8266e" class="">The TSAR query service as we can see consolidates both the Manhattan and the cache service to provide the data to the clients. Because of the potential loss of real-time data, the TSAR service might provide inaccurate metrics to the customers.</p><p id="683d7e1e-5d34-4e4a-8833-1012b09a7733" class="">Now this would cause a significant problem because</p><p id="f7f335e8-a30e-4a75-83d6-c94f2a298588" class="">1) Twitter ads services is one of the topmost revenue model for twitter if its performance is impacted it directly impacts their business model.</p><p id="ae7fe729-79fa-42fb-aa2d-cb01d3d31a23" class="">2) Twitter offers various data product services to retrieve information on impression and engagement metrics these services would be impacted by inaccurate data.</p><p id="d877c094-52e4-47ff-a3ce-e40c14ae66f0" class="">3) Another problem in this case is that the time from the event created to when it is available for use could take some hours because of the batch processing jobs, this would mean that the data analytics or any other operations that needed to be performed by the clients would not have the up to date data. There would be a time lag of maybe a few hours.</p><p id="efd64fa0-3792-4837-8016-3d72c5b8f464" class="">Now, this would mean if we want to update the user’s timeline based on the events generated by the user or perform behavioural analysis on the users on how they interact with the twitter systems, the customer would not be able to do that as they would need to wait for the batch to be completed.</p><h3 id="36f3ee0d-3767-4f34-af83-28d09cea66b7" class="">New <strong><strong>architecture</strong></strong></h3><p id="d6201655-89d4-46b6-adc5-174552523123" class=""> </p><figure id="7034affb-480e-4b6d-9f32-08972011ea99" class="image"><a href="twitter/blog/new_architecture.png"><img style="width:2302px" src="twitter/blog/new_architecture.png"/></a></figure><p id="799d081d-1b74-4714-ba5f-ebd3681bb005" class="">
+</p><p id="9fba380f-f740-45a6-98b1-a61ee6d5d23e" class="">The new architecture was built on both twitter data center services and Google Cloud platform. Twitter built a event processing pipeline which converts kafa topic to a pub sub topic which was sent to google cloud. On the google cloud streaming data flow jobs performed real-time aggregation and sink data into the BigTable. </p><p id="ba1f0864-4fd8-46f9-8626-f1cb28cdbffa" class="">
+</p><figure id="59f64f19-cc59-4537-ae1a-9e6c07f05be8" class="image"><a href="twitter/blog/Screenshot_2024-03-30_at_3.01.22_PM.png"><img style="width:708px" src="twitter/blog/Screenshot_2024-03-30_at_3.01.22_PM.png"/></a></figure><p id="0f73576b-b288-429c-9948-490a2d2aea26" class="">
+</p><p id="8dc2f66b-2bba-4af7-90c9-00adb94cbd0b" class="">For the serving layer, twitter uses LDC query service with front end in twitter data centers and backend as Bigtable and Bigquery. The whole system can stream up to millions events per second with low latency upto ~10 ms and it can be easily scaled up during high traffic</p><p id="b58de4a1-32bb-45d0-90c5-b299e37e46b7" class="">This new architecture saves the cost to build the batch pipelines, and for real-time pipelines, twitter is able to achieve higher aggregation accuracy and stable low latency. Also, they do not need to maintain different real-time event aggregations in multiple data centers.</p><h3 id="014cab4a-0a64-48da-b8ed-0e9e9ac43713" class="">Performance Comparison</h3><figure id="97e4b66c-9407-4cf3-af39-a957e31c8ea7" class="image"><a href="twitter/blog/Evaluation.png"><img style="width:568px" src="twitter/blog/Evaluation.png"/></a></figure><p id="09722e88-94c7-4750-9189-38cfbf1d1f29" class="">
+</p><p id="5d07c379-2e66-4482-a969-b2d255dd0dd1" class=""> The new architecture provides lower latency compared with Heron topology in the old architecture and offers higher throughput. Also, the new architecture handles late events counting and does not lose events when doing real-time aggregation. Moreover, there is no batch component in the new architecture, so it simplifies the design and reduces compute cost which existed in the old architecture.</p><h3 id="b8acaffc-5871-4fb8-81aa-6c5bd9bba660" class="">Conclusion</h3><p id="1a59d3ce-645b-4f53-9de7-06e822ccf6d7" class="">With migrating the old architecture built on TSAR to the hybrid architecture on both Twitter Data Center and Google Cloud Platform, twitter is able to process billions of events in real time and achieve low latency, high accuracy, stability, architecture simplicity, and reduced operation cost for engineers.</p><p id="3209585e-eadc-49f1-ba4a-147d056e4d46" class="">
+</p><p id="0ec1a704-e899-4979-b5b3-6b80b28766b8" class="">Schedule a mock System Design Interview with me : <a href="https://www.meetapro.com/provider/listing/160769">https://www.meetapro.com/provider/listing/160769</a></p><p id="568a6858-2444-41ec-b0de-903e071c917b" class="">Linkedin: <a href="https://www.linkedin.com/in/mayank-sharma-2002bb10b/">https://www.linkedin.com/in/mayank-sharma-2002bb10b/</a></p><blockquote id="e574a0af-bac9-48cc-b694-c997cbde0dce" class="">https://www.buymeacoffee.com/imayanks</blockquote><p id="c44879b0-c5b7-4e86-b9e5-330416d83d96" class="">
+</p></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

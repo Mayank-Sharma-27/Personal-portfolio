@@ -6,6 +6,12 @@
       "source": "blogs/how-meta-improved-cache-consistency.html"
     },
     {
+      "title": "How twitter improved the processing of events",
+      "imageSrc": "blogs/twitter.png",
+      "description": "This blog explains twitter processes 400 billion events daily",
+      "source": "blogs/how-twitter-improved-events-processing.html"
+    },
+    {
       "title": "Behind the scenes of github copilot",
       "imageSrc": "blogs/github_coplilot.png",
       "description": "This blog explains github copilot works behind the scenes",
