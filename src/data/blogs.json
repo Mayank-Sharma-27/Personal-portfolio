@@ -18,6 +18,12 @@
       "source": "blogs/behind-scenes-of-github-copilot.html"
     },
     {
+      "title": "What is TCP 3 way Handshake",
+      "imageSrc": "blogs/tcp.png",
+      "description": "This blog explains how tcp connection is established",
+      "source": "blogs/what-is-tcp-3-way-handshake.html"
+    },
+    {
       "title": "Meta Presence Platform | Overview",
       "imageSrc": "blogs/presence_platform.jpg",
       "description": "Basic Building block of meta mixed reality development",
