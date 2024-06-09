@@ -15,7 +15,7 @@
       "title": "How Facebook solved Thundering Hed Problem",
       "imageSrc": "blogs/thundering.png",
       "description": "Dive deep on how facebook handles sudden burst of traffic",
-      "source": "blogs/how-meta-solved-thundering-herd-problemg.html"
+      "source": "blogs/how-meta-solved-thundering-herd-problem.html"
     },
     {
       "title": "Behind the scenes of github copilot",
