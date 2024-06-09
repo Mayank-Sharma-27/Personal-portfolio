@@ -12,6 +12,12 @@
       "source": "blogs/how-twitter-improved-events-processing.html"
     },
     {
+      "title": "How Facebook solved Thundering Hed Problem",
+      "imageSrc": "blogs/thundering.png",
+      "description": "Dive deep on how facebook handles sudden burst of traffic",
+      "source": "blogs/how-meta-solved-thundering-herd-problemg.html"
+    },
+    {
       "title": "Behind the scenes of github copilot",
       "imageSrc": "blogs/github_coplilot.png",
       "description": "This blog explains github copilot works behind the scenes",
