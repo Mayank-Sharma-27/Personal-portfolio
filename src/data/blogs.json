@@ -30,6 +30,12 @@
       "source": "blogs/what-is-tcp-3-way-handshake.html"
     },
     {
+      "title": "How VPN protects your identity",
+      "imageSrc": "blogs/VPN.png",
+      "description": "Expalnation of how three-way communication works with VPN",
+      "source": "blogs/how-vpn-protects-your-identity.html"
+    },
+    {
       "title": "Meta Presence Platform | Overview",
       "imageSrc": "blogs/presence_platform.jpg",
       "description": "Basic Building block of meta mixed reality development",
