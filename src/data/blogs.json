@@ -6,6 +6,12 @@
       "source": "blogs/how-meta-improved-cache-consistency.html"
     },
     {
+      "title": "Composition VS Inheritance in Cricket terms",
+      "imageSrc": "blogs/virat.png",
+      "description": "This blog explains how why composition is better than inheritance using cricket analogy",
+      "source": "blogs/composition-vs-inheritance-in-cricket-terms.html"
+    },
+    {
       "title": "How twitter improved the processing of events",
       "imageSrc": "blogs/twitter.png",
       "description": "This blog explains twitter processes 400 billion events daily",
