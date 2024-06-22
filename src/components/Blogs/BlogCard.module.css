@@ -9,6 +9,7 @@
   padding: 18px 24px;
   max-width: 345px;
   overflow: hidden;
+  cursor: pointer;
 }
 
 .image {

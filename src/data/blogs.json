@@ -49,11 +49,11 @@
        "source": "blogs/how-vpn-protects-your-identity.md"
     },
     {
-       "id": "how-real-time-document-check-words",
+       "id": "how-real-time-document-check-works",
        "title": "How Real Time Document Check Works",
        "imageSrc": "blogs/document.png",
        "description": "Expalnation of how real time document check works",
-       "source": "blogs/how-real-time-document-check-words.md"
+       "source": "blogs/how-real-time-document-check-works.md"
     },
     {
        "id": "what-is-Lambda-Architecture",
