@@ -1,105 +1,66 @@
 [
     {
-      "title": "How meta improved their cache consistency to 99.99999999",
-      "imageSrc": "blogs/meta_cache.jpg",
-      "description": "This blog explains how meta improved their cache consistency to 99.99999999",
-      "source": "blogs/how-meta-improved-cache-consistency.html"
+       "id": "how-meta-improved-cache-consistency",
+       "title": "How meta improved their cache consistency to 99.99999999",
+       "imageSrc": "blogs/meta_cache.jpg",
+       "description": "This blog explains how meta improved their cache consistency to 99.99999999",
+       "source": "blogs/how-meta-improved-cache-consistency.md"
     },
     {
-      "title": "Composition VS Inheritance in Cricket terms",
-      "imageSrc": "blogs/Virat.png",
-      "description": "This blog explains how why composition is better than inheritance using cricket analogy",
-      "source": "blogs/composition-vs-inheritance-in-cricket-terms.html"
+       "id": "composition-vs-inheritance-in-cricket-terms",
+       "title": "Composition VS Inheritance in Cricket terms",
+       "imageSrc": "blogs/Virat.png",
+       "description": "This blog explains how why composition is better than inheritance using cricket analogy",
+       "source": "blogs/composition-vs-inheritance-in-cricket-terms.md"
     },
     {
-      "title": "How twitter improved the processing of events",
-      "imageSrc": "blogs/twitter.png",
-      "description": "This blog explains twitter processes 400 billion events daily",
-      "source": "blogs/how-twitter-improved-events-processing.html"
+       "id": "how-twitter-improved-events-processing",
+       "title": "How twitter improved the processing of events",
+       "imageSrc": "blogs/twitter.png",
+       "description": "This blog explains twitter processes 400 billion events daily",
+       "source": "blogs/how-twitter-improved-events-processing.md"
     },
     {
-      "title": "How Facebook solved Thundering Hed Problem",
-      "imageSrc": "blogs/thundering.png",
-      "description": "Dive deep on how facebook handles sudden burst of traffic",
-      "source": "blogs/how-meta-solved-thundering-herd-problem.html"
+       "id": "how-meta-solved-thundering-herd-problem",
+       "title": "How Facebook solved Thundering Hed Problem",
+       "imageSrc": "blogs/thundering.png",
+       "description": "Dive deep on how facebook handles sudden burst of traffic",
+       "source": "blogs/how-meta-solved-thundering-herd-problem.md"
     },
     {
-      "title": "Behind the scenes of github copilot",
-      "imageSrc": "blogs/github_coplilot.png",
-      "description": "This blog explains github copilot works behind the scenes",
-      "source": "blogs/behind-scenes-of-github-copilot.html"
+       "id": "behind-the-scenes-of-github-copilot",
+       "title": "Behind the scenes of github copilot",
+       "imageSrc": "blogs/github_coplilot.png",
+       "description": "This blog explains github copilot works behind the scenes",
+       "source": "blogs/behind-the-scenes-of-github-copilot.md"
     },
     {
-      "title": "What is TCP 3 way Handshake",
-      "imageSrc": "blogs/tcp.png",
-      "description": "This blog explains how tcp connection is established",
-      "source": "blogs/what-is-tcp-3-way-handshake.html"
+       "id": "what-is-tcp-3-way-handshake",
+       "title": "What is TCP 3 way Handshake",
+       "imageSrc": "blogs/tcp.png",
+       "description": "This blog explains how tcp connection is established",
+       "source": "blogs/what-is-tcp-3-way-handshake.md"
     },
     {
-      "title": "How VPN protects your identity",
-      "imageSrc": "blogs/VPN.png",
-      "description": "Expalnation of how three-way communication works with VPN",
-      "source": "blogs/how-vpn-protects-your-identity.html"
+       "id": "how-vpn-protects-your-identity",
+       "title": "How VPN protects your identity",
+       "imageSrc": "blogs/VPN.png",
+       "description": "Expalnation of how three-way communication works with VPN",
+       "source": "blogs/how-vpn-protects-your-identity.md"
     },
     {
-      "title": "Meta Presence Platform | Overview",
-      "imageSrc": "blogs/presence_platform.jpg",
-      "description": "Basic Building block of meta mixed reality development",
-      "source": "https://medium.com/@mayank.sharma2796/meta-presence-platform-overview-46e08007110d"
-    },    
-    {
-      "title": "SOLID principles in CRICKET TERMS",
-      "imageSrc": "blogs/solid.png",
-      "description": "This blog explains SOLID priciples in cricket terms.",
-      "source": "https://medium.com/@mayank.sharma2796/solid-principles-in-cricket-terms-f62a9405e21e"
+       "id": "how-real-time-document-check-words",
+       "title": "How Real Time Document Check Works",
+       "imageSrc": "blogs/document.png",
+       "description": "Expalnation of how real time document check works",
+       "source": "blogs/how-real-time-document-check-words.md"
     },
     {
-      "title": "Leases and Fencing",
-      "imageSrc": "blogs/leases.png",
-      "description": "Achieving Data Consistency in Distributed Systems: Leases and Fencing.",
-      "source": "https://medium.com/@mayank.sharma2796/achieving-data-consistency-in-distributed-systems-leases-and-fencing-a6ca319a0e99"
-    },
-    {
-      "title": "What is Twitter’s Tweet Recommendation Algorithm?",
-      "imageSrc": "blogs/twitter.png",
-      "description": "Dive deep on how twitter prepares the timeline.",
-      "source": "https://medium.com/@mayank.sharma2796/what-is-twitters-tweet-recommendation-algorithm-ec0827690fa1"
-    },
-    {
-        "title": "Mastering Backend Caching Strategies",
-        "imageSrc": "blogs/cache.png",
-        "description": "Dive deep on how twitter prepares the timeline.",
-        "source": "https://medium.com/@mayank.sharma2796/mastering-backend-caching-strategies-51e87130ba34"
-    },
-    {
-      "title": "Master-Replica Architecture",
-      "imageSrc": "blogs/master-replica.png",
-      "description": "Dive deep on how twitter prepares the timeline",
-      "source": "https://medium.com/@mayank.sharma2796/mastering-backend-caching-strategies-51e87130ba34"
-    },
-    {
-        "title": "Exploring Database Durability: The “D” in ACID",
-        "imageSrc": "blogs/durability.png",
-        "description": "How durability is achieved in the midst of bustling transactions, and its role in distributed settings.",
-        "source": "https://medium.com/@mayank.sharma2796/exploring-database-durability-the-d-in-acid-f2d8c13744e9"
-    },
-    {
-        "title": "Exploring Database Isolation: The “I” in ACID",
-        "imageSrc": "blogs/isolation.png",
-        "description": "Diving deep into isolation.",
-        "source": "https://medium.com/@mayank.sharma2796/exploring-database-isolation-the-i-in-acid-97ba1a82714e"
-    },
-    {
-        "title": "Exploring Consistency in ACID",
-        "imageSrc": "blogs/consistency.png",
-        "description": "Implementation of Consistency, the “C” in ACID",
-        "source": "https://medium.com/@mayank.sharma2796/exploring-database-isolation-the-i-in-acid-97ba1a82714e"
-    },
-    {
-        "title": "Understanding Atomicity in ACID",
-        "imageSrc": "blogs/atomicity.png",
-        "description": "Implementation of Atomicity, the “A” in ACID",
-        "source": "https://medium.com/@mayank.sharma2796/understanding-atomicity-in-acid-dd96ebd7d6f9"
+       "id": "what-is-Lambda-Architecture",
+       "title": "What is Lambda Architecture",
+       "imageSrc": "blogs/Lambda_architecture.png",
+       "description": "What is Lambda Architecture? Lets us understand the Lambda Architecture in detail.",
+       "source": "blogs/what-is-Lambda-Architecture.md"
     }
-
-  ]
+  
+]
