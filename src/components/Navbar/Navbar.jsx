@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
-
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import styles from "./Navbar.module.css";
-
-import { getImageUrl } from '../../utils';
-
-import { Modal } from '../Modal/Modal.jsx';
+import { getImageUrl } from "../../utils";
+import { Modal } from "../Modal/Modal.jsx";
 
 export const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -12,49 +10,50 @@ export const Navbar = () => {
 
   const handleOpenModal = () => {
     setIsOpen(true);
-};
+  };
 
-const handleCloseModal = () => {
-  setIsOpen(false);
-};
+  const handleCloseModal = () => {
+    setIsOpen(false);
+  };
 
   return (
-  <nav className={styles.navbar}>
-    <a className={styles.title} href='/'>
-      Mayank Sharma
-    </a>
-    <div className={styles.menu}>
-        <img className={styles.menuBtn}
+    <nav className={styles.navbar}>
+      <Link className={styles.title} to="/">
+        Mayank Sharma
+      </Link>
+      <div className={styles.menu}>
+        <img
+          className={styles.menuBtn}
           src={
-            menuOpen 
+            menuOpen
               ? getImageUrl("nav/closeIcon.png")
               : getImageUrl("nav/menuIcon.png")
           }
           alt="menu-button"
           onClick={() => setMenuOpen(!menuOpen)}
-          />
-        <ul 
-            className={`${styles.menuItems} ${menuOpen && styles.menuOpen}`} 
-            onClick={() => setMenuOpen(false)}>
-            <li>
-                <a href='#about'>About</a>
-            </li>
-            <li>
-                <a href='#experience'>Experience</a>
-            </li>
-            <li>
-                <a href='#blogs'>Blogs</a>
-            </li>
-            <li>
-                <a href='#about'>Contact</a>
-            </li>
-            <li>
-                <a onClick={handleOpenModal}>Resume</a>
-                <Modal isOpen={isOpen} onClose={handleCloseModal} />
-            </li>
-
+        />
+        <ul
+          className={`${styles.menuItems} ${menuOpen && styles.menuOpen}`}
+          onClick={() => setMenuOpen(false)}
+        >
+          <li>
+            <Link to="/#about">About</Link>
+          </li>
+          <li>
+            <Link to="/#experience">Experience</Link>
+          </li>
+          <li>
+            <Link to="/#blogs">Blogs</Link>
+          </li>
+          <li>
+            <Link to="/#contact">Contact</Link>
+          </li>
+          <li>
+            <a onClick={handleOpenModal}>Resume</a>
+            <Modal isOpen={isOpen} onClose={handleCloseModal} />
+          </li>
         </ul>
-    </div>
-  </nav>
+      </div>
+    </nav>
   );
 };
