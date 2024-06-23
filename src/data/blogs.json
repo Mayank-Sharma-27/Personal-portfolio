@@ -49,11 +49,11 @@
        "source": "blogs/how-vpn-protects-your-identity.md"
     },
     {
-       "id": "how-real-time-document-check-words",
+       "id": "how-real-time-document-check-works",
        "title": "How Real Time Document Check Works",
        "imageSrc": "blogs/document.png",
        "description": "Expalnation of how real time document check works",
-       "source": "blogs/how-real-time-document-check-words.md"
+       "source": "blogs/how-real-time-document-check-works.md"
     },
     {
        "id": "what-is-Lambda-Architecture",
@@ -61,6 +61,13 @@
        "imageSrc": "blogs/Lambda_architecture.png",
        "description": "What is Lambda Architecture? Lets us understand the Lambda Architecture in detail.",
        "source": "blogs/what-is-Lambda-Architecture.md"
+    },
+    {
+       "id": "dll-not-found",
+       "title": "What is DLL not found error?",
+       "imageSrc": "blogs/gta.png",
+       "description": "Ever Faced DLL Not Found Error While Running Your PC Game as a child? Let's See What That was!",
+       "source": "blogs/dll-not-found.md"
     }
   
 ]
