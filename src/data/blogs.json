@@ -61,6 +61,13 @@
        "imageSrc": "blogs/Lambda_architecture.png",
        "description": "What is Lambda Architecture? Lets us understand the Lambda Architecture in detail.",
        "source": "blogs/what-is-Lambda-Architecture.md"
+    },
+    {
+       "id": "Ever Faced a DLL Not Found Error While Running Your PC Game as a child? Let's See What That was!",
+       "title": "What is DLL not found error?",
+       "imageSrc": "blogs/gta.png",
+       "description": "Ever Faced a DLL Not Found Error While Running Your PC Game as a child? Let's See What That was!",
+       "source": "blogs/dll-not-found.md"
     }
   
 ]
