@@ -4,10 +4,12 @@
         "organisation": "Aamazon",
         "startDate": "Aug, 2022",
         "endDate": "present",
-        "experiences": ["Migrating 15-year-old framework with 8000 Perl lines, impacting Amazon Retail checkout, fostering team collaboration.",
-      "Enhanced data pipeline for a tier1 service.",
-  "Spearheaded Prime Day 2023 planning.",
-  "Slashed service deployment time by 25%."],
+        "experiences": ["Leading a project to mitigate the feature gap in Amazon Retail to enable 20% of the retail customers save 3.1 seconds during retail checkout. Owning end to end mitigation involving high level design and code implementation to handle a traﬃc of 1500 TPS..",
+      "Lead a project to improve the existing infrastructure of the platform team leading to 22% improvement in eﬃciency and approximate $25,000 yearly savings.",
+  "Improved data pipeline of a tier1 service by implementing event-driven architecture solutions, ensuring seamless communication between distributed systems leading to improvement in metrics calculation by 18%.",
+  "Found an existing gap in the service and worked across teams to improve the operational load in the team by 14%.",
+"Took ownership of scaling Tier-1 service during Prime Early access event, Diwali and Black Friday with service receiving more than 10+ billion requests during each event and maintaining 99.99% availability.",
+"Reduced the deployment time of the service by 25% by optimising the number of hosts deployed in parallel in the ﬂeet."],
         "imageSrc": "history/amazon.png"
       },
     {
@@ -15,9 +17,9 @@
       "organisation": "Part Avatar",
       "startDate": "July, 2018",
       "endDate": "July, 2022",
-      "experiences": ["Integrated payment methods (Gpay, Apple Pay, Sezzle, Flexity) in checkout.",
-       "Developed RESTful APIs, database interactions for frontend features.",
-        "Boosted productivity through automated testing processes."],
+      "experiences": ["Implemented RESTful APIs and database interactions to support frontend functionalities to introduce new features like rapid deliveries, rules-based discounts, product personalisations by collaborating with a team of developers ensuring robust functionality and optimal performance which helped revenue grow by 400% over 3 years.",
+       "Automated the testing process improving developer productivity and reduced the testing time to 30 minutes by implementing integration tests with 80% website coverage helping in more frequent deployments.",
+        "Introduced new payment methods (Google Pay, Apple Pay, Sezzle) contributing to an increase in monthly revenue by 18%."],
       "imageSrc": "history/partsavatar.png"
     },
     
