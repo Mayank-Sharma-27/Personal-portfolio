@@ -6,6 +6,13 @@
        "description": "This blog explains how meta improved their cache consistency to 99.99999999",
        "source": "blogs/how-meta-improved-cache-consistency.md"
     },
+        {
+       "id": "how-instagram-selects-what-you-see",
+       "title": "Here is How Instagram Selects what you see in Explore page",
+       "imageSrc": "blogs/instagram.png",
+       "description": "This blog explains how instagram make sure that you see the best content",
+       "source": "blogs/how-instagram-selects-what-you-see.md"
+    },
     {
        "id": "composition-vs-inheritance-in-cricket-terms",
        "title": "Composition VS Inheritance in Cricket terms",
