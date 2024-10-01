@@ -1,7 +1,7 @@
 [
     {
         "role": "Software Development Engineer 2",
-        "organisation": "Aamazon",
+        "organisation": "Amazon",
         "startDate": "Aug, 2022",
         "endDate": "present",
         "experiences": ["Leading a project to mitigate the feature gap in Amazon Retail to enable 20% of the retail customers save 3.1 seconds during retail checkout. Owning end to end mitigation involving high level design and code implementation to handle a traﬃc of 1500 TPS..",
